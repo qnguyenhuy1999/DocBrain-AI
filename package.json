@@ -1,0 +1,22 @@
+{
+  "name": "docbrain-ai",
+  "version": "0.0.1",
+  "private": true,
+  "packageManager": "pnpm@11.0.0",
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "typecheck": "turbo typecheck",
+    "api:dev": "turbo dev --filter=@docbrain/api",
+    "web:dev": "turbo dev --filter=@docbrain/web",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\" --ignore-path .gitignore",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\" --ignore-path .gitignore"
+  },
+  "devDependencies": {
+    "turbo": "^2.5.4",
+    "typescript": "^5.9.2",
+    "prettier": "^3.5.3",
+    "@types/node": "^24.0.1"
+  }
+}

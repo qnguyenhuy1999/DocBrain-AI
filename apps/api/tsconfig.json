@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./dist", "rootDir": "./src",
+    "module": "CommonJS", "moduleResolution": "Node", "target": "ES2022",
+    "emitDecoratorMetadata": true, "experimentalDecorators": true,
+    "paths": {
+      "@docbrain/types": ["../../packages/types/src"],
+      "@docbrain/validators": ["../../packages/validators/src"],
+      "@docbrain/config": ["../../packages/config/src"]
+    }
+  },
+  "include": ["src"]
+}

@@ -1,0 +1,15 @@
+﻿node_modules
+.pnp
+dist
+.next
+out
+build
+*.tsbuildinfo
+.env
+.env.local
+.env.production
+.turbo
+.DS_Store
+coverage
+playwright-report
+test-results

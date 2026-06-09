@@ -1,0 +1,31 @@
+{
+  "name": "@docbrain/web",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --port 3000",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@docbrain/types": "workspace:*",
+    "@docbrain/ui": "workspace:*",
+    "@docbrain/validators": "workspace:*",
+    "@tanstack/react-query": "^5.80.5",
+    "@tanstack/react-query-devtools": "^5.80.5",
+    "next": "^16.0.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "devDependencies": {
+    "@docbrain/eslint-config": "workspace:*",
+    "@types/node": "^24.0.1",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "eslint": "^9.28.0",
+    "tailwindcss": "^4.1.8",
+    "typescript": "^5.9.2"
+  }
+}
