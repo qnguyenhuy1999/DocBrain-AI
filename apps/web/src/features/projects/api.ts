@@ -48,3 +48,14 @@ export function useIndexProject(projectId: string) {
     },
   })
 }
+
+export function useArchiveProject(projectId: string) {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: () => apiClient.archiveProject(projectId),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: projectKeys.all })
+    },
+  })
+}

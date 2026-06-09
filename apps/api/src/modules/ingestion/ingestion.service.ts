@@ -1,5 +1,5 @@
 import type { Chunk, DocumentListItem, IndexProjectResponse } from '@docbrain/types'
-import { Injectable, Logger, NotFoundException } from '@nestjs/common'
+import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { PrismaService } from '../database/prisma.service'
 import { IndexerService } from './services/indexer.service'
 
@@ -14,14 +14,20 @@ export class IngestionService {
   ) {}
 
   async indexProject(projectId: string, maxPages: number): Promise<IndexProjectResponse> {
-    await this.assertProjectExists(projectId)
+    const project = await this.assertProjectExists(projectId)
+
+    if (project.status === 'ARCHIVED') {
+      throw new BadRequestException('Cannot index an archived project')
+    }
+
+    const cappedMaxPages = Math.min(maxPages, 100)
 
     if (this.activeJobs.has(projectId)) {
       return { projectId, status: 'ALREADY_RUNNING' }
     }
 
     const job: Promise<void> = this.indexerService
-      .indexProject(projectId, maxPages)
+      .indexProject(projectId, cappedMaxPages)
       .then(() => undefined)
       .catch((error: unknown) => {
         this.logger.error(`Indexing failed for project ${projectId}`, error)
@@ -81,14 +87,16 @@ export class IngestionService {
     })
   }
 
-  private async assertProjectExists(projectId: string): Promise<void> {
+  private async assertProjectExists(projectId: string): Promise<{ status: 'ACTIVE' | 'ARCHIVED' }> {
     const project = await this.prisma.project.findUnique({
       where: { id: projectId },
-      select: { id: true },
+      select: { id: true, status: true },
     })
 
     if (!project) {
       throw new NotFoundException(`Project ${projectId} was not found`)
     }
+
+    return { status: project.status }
   }
 }

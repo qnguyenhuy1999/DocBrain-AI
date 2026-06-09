@@ -18,6 +18,19 @@ import type {
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'
 
+type ApiErrorBody = {
+  message?: string | string[]
+  error?: string
+  statusCode?: number
+}
+
+function formatApiError(body: ApiErrorBody, fallback: string): string {
+  if (Array.isArray(body.message)) return body.message.join(', ')
+  if (body.message) return body.message
+  if (body.error) return body.error
+  return fallback
+}
+
 async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
   const response = await fetch(`${API_URL}${path}`, {
     ...options,
@@ -28,8 +41,15 @@ async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
   })
 
   if (!response.ok) {
-    const text = await response.text()
-    throw new Error(text || `Request failed with ${response.status}`)
+    const fallback = `Request failed with ${response.status}`
+    try {
+      const body = (await response.json()) as ApiErrorBody
+      throw new Error(formatApiError(body, fallback))
+    } catch (e) {
+      if (e instanceof Error && e.message !== fallback) throw e
+      const text = await response.text().catch(() => '')
+      throw new Error(text || fallback)
+    }
   }
 
   return response.json() as Promise<T>
@@ -149,6 +169,12 @@ export const apiClient = {
       userMessage: normalizeMessage(response.userMessage),
       assistantMessage: normalizeMessage(response.assistantMessage),
     }
+  },
+  async archiveProject(projectId: string): Promise<ProjectOverview> {
+    const project = await apiFetch<ProjectOverview>(`/projects/${projectId}/archive`, {
+      method: 'POST',
+    })
+    return normalizeProject(project)
   },
 }
 

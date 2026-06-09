@@ -11,13 +11,16 @@ import {
   useMessages,
   useSendMessage,
 } from '@/features/chat/api'
+import { useProject } from '@/features/projects/api'
 import { ConversationSidebar } from '@/features/chat/conversation-sidebar'
 import { MessageInput } from '@/features/chat/message-input'
 import { MessageList } from '@/features/chat/message-list'
 
 export default function ProjectChatPage({ params }: { params: { projectId: string } }) {
   const [selectedConversationId, setSelectedConversationId] = useState<string | undefined>(undefined)
+  const [optimisticMessages, setOptimisticMessages] = useState<Message[]>([])
   const projectId = params.projectId
+  const project = useProject(projectId)
   const conversations = useConversations(projectId)
   const createConversation = useCreateConversation(projectId)
   const messages = useMessages(selectedConversationId)
@@ -43,15 +46,25 @@ export default function ProjectChatPage({ params }: { params: { projectId: strin
       setSelectedConversationId(conversation.id)
     }
 
-    await sendMessage.mutateAsync({
-      conversationId,
-      message: { message },
-    })
+    const now = new Date()
+    setOptimisticMessages([
+      { id: 'optimistic-user', role: 'USER', content: message, citations: [], createdAt: now, conversationId: conversationId },
+      { id: 'optimistic-assistant', role: 'ASSISTANT', content: '', citations: [], createdAt: now, conversationId: conversationId },
+    ])
+
+    try {
+      await sendMessage.mutateAsync({
+        conversationId,
+        message: { message },
+      })
+    } finally {
+      setOptimisticMessages([])
+    }
   }
 
   if (conversations.isLoading) {
     return (
-      <AppShell title="Chat" description="Grounded chat over indexed documentation.">
+      <AppShell title="Chat" description="Grounded chat over indexed documentation." projectId={projectId} projectName={project.data?.name}>
         <LoadingState title="Loading conversations" description="Fetching existing threads for this project." />
       </AppShell>
     )
@@ -59,20 +72,23 @@ export default function ProjectChatPage({ params }: { params: { projectId: strin
 
   if (conversations.error) {
     return (
-      <AppShell title="Chat" description="Grounded chat over indexed documentation.">
+      <AppShell title="Chat" description="Grounded chat over indexed documentation." projectId={projectId} projectName={project.data?.name}>
         <ErrorState title="Could not load conversations" message={conversations.error.message} />
       </AppShell>
     )
   }
 
-  const visibleMessages: Message[] = messages.data ?? []
+  const realMessages: Message[] = messages.data ?? []
+  const displayMessages: Message[] = [...realMessages, ...optimisticMessages]
 
   return (
     <AppShell
       title="Chat with indexed docs"
       description="Messages stay grounded in retrieved chunks, and assistant replies expose citations under each answer."
+      projectId={projectId}
+      projectName={project.data?.name}
     >
-      <div className="grid gap-6 lg:grid-cols-[320px_minmax(0,1fr)]">
+      <div className="grid gap-6 overflow-x-hidden lg:grid-cols-[320px_minmax(0,1fr)]">
         <ConversationSidebar
           conversations={conversations.data ?? []}
           isCreatingConversation={createConversation.isPending}
@@ -80,14 +96,15 @@ export default function ProjectChatPage({ params }: { params: { projectId: strin
           onSelectConversation={setSelectedConversationId}
           selectedConversationId={selectedConversationId}
         />
-        <div className="rounded-3xl border border-white/60 bg-amber-50/60 p-4">
+        <div className="min-w-0 rounded-3xl border border-white/60 bg-amber-50/60 p-4">
           {messages.error ? <ErrorState title="Could not load messages" message={messages.error.message} /> : null}
-          {visibleMessages.length === 0 ? (
-            <div className="rounded-3xl border border-dashed border-slate-300 bg-white/80 p-8 text-sm text-slate-600">
-              No conversations yet
+          {displayMessages.length === 0 ? (
+            <div className="rounded-3xl border border-dashed border-slate-300 bg-white/80 p-8 text-center">
+              <p className="text-sm font-medium text-slate-700">Ask a question about this project's docs</p>
+              <p className="mt-1 text-xs text-slate-500">Based on indexed documentation</p>
             </div>
           ) : (
-            <MessageList messages={visibleMessages} />
+            <MessageList messages={displayMessages} />
           )}
           {sendMessage.error ? (
             <div className="mt-4">

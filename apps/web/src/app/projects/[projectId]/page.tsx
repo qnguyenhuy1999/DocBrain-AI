@@ -4,12 +4,14 @@ import { AppShell } from '@/components/app-shell'
 import { ErrorState } from '@/components/error-state'
 import { LoadingState } from '@/components/loading-state'
 import { useDocuments } from '@/features/documents/api'
-import { useIndexProject, useProject } from '@/features/projects/api'
+import { useArchiveProject, useIndexProject, useProject } from '@/features/projects/api'
 import { ProjectOverview } from '@/features/projects/project-overview'
+import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
 export default function ProjectDetailPage({ params }: { params: { projectId: string } }) {
   const [indexFeedback, setIndexFeedback] = useState<string | null>(null)
+  const router = useRouter()
   const projectId = params.projectId
   const project = useProject(projectId)
   const documents = useDocuments(
@@ -17,6 +19,7 @@ export default function ProjectDetailPage({ params }: { params: { projectId: str
     project.data && (project.data.processingCount > 0 || project.data.pendingCount > 0) ? 4000 : false,
   )
   const indexProject = useIndexProject(projectId)
+  const archiveProject = useArchiveProject(projectId)
 
   async function handleIndex(): Promise<void> {
     const response = await indexProject.mutateAsync({ maxPages: 30 })
@@ -27,7 +30,7 @@ export default function ProjectDetailPage({ params }: { params: { projectId: str
 
   if (project.isLoading) {
     return (
-      <AppShell title="Project detail" description="Loading project overview.">
+      <AppShell title="Project detail" description="Loading project overview." projectId={projectId}>
         <LoadingState title="Loading project" description="Fetching project summary and document stats." />
       </AppShell>
     )
@@ -35,7 +38,7 @@ export default function ProjectDetailPage({ params }: { params: { projectId: str
 
   if (project.error) {
     return (
-      <AppShell title="Project detail" description="Project lookup failed.">
+      <AppShell title="Project detail" description="Project lookup failed." projectId={projectId}>
         <ErrorState title="Could not load project" message={project.error.message} />
       </AppShell>
     )
@@ -43,7 +46,7 @@ export default function ProjectDetailPage({ params }: { params: { projectId: str
 
   if (!project.data) {
     return (
-      <AppShell title="Project detail" description="Project not found.">
+      <AppShell title="Project detail" description="Project not found." projectId={projectId}>
         <ErrorState title="Project not found" message="The requested project does not exist." />
       </AppShell>
     )
@@ -53,12 +56,17 @@ export default function ProjectDetailPage({ params }: { params: { projectId: str
     <AppShell
       title={project.data.name}
       description="Project overview, indexing controls, and direct links into ingestion, retrieval, and chat debugging."
+      projectId={projectId}
+      projectName={project.data.name}
     >
       <ProjectOverview
         indexError={indexProject.error?.message}
         indexFeedback={indexFeedback}
         isIndexing={indexProject.isPending}
         onIndex={() => void handleIndex()}
+        onArchive={() => {
+          void archiveProject.mutateAsync().then(() => router.push('/projects'))
+        }}
         project={project.data}
       />
     </AppShell>

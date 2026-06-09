@@ -12,12 +12,14 @@ export function ProjectOverview({
   isIndexing,
   indexFeedback,
   indexError,
+  onArchive,
 }: {
   project: ProjectOverviewType
   onIndex: () => void
   isIndexing: boolean
   indexFeedback: string | null
   indexError?: string
+  onArchive: () => void
 }) {
   return (
     <div className="grid gap-6">
@@ -51,6 +53,15 @@ export function ProjectOverview({
             <Link className={cn(buttonVariants({ variant: 'outline' }))} href={`/projects/${project.id}/chat`}>
               Open chat
             </Link>
+            {project.status !== 'ARCHIVED' ? (
+              <Button
+                variant="outline"
+                className="border-rose-200 text-rose-700 hover:bg-rose-50"
+                onClick={onArchive}
+              >
+                Archive project
+              </Button>
+            ) : null}
           </div>
           {indexFeedback ? (
             <p className="text-sm font-medium text-emerald-700">{indexFeedback}</p>

@@ -26,6 +26,7 @@ export function MessageInput({
   return (
     <form className="space-y-3" onSubmit={(event) => void handleSubmit(event)}>
       <Textarea
+        disabled={isPending}
         placeholder="Ask a question about the indexed documentation"
         value={message}
         onChange={(event) => setMessage(event.target.value)}
