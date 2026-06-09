@@ -1,4 +1,4 @@
-import type { Chunk, Document, IndexProjectResponse } from '@docbrain/types'
+import type { Chunk, DocumentListItem, IndexProjectResponse } from '@docbrain/types'
 import {
   Body,
   Controller,
@@ -25,7 +25,9 @@ export class IngestionController {
   }
 
   @Get(':projectId/documents')
-  getDocuments(@Param('projectId', new ParseUUIDPipe()) projectId: string): Promise<Document[]> {
+  getDocuments(
+    @Param('projectId', new ParseUUIDPipe()) projectId: string,
+  ): Promise<DocumentListItem[]> {
     return this.ingestionService.getProjectDocuments(projectId)
   }
 

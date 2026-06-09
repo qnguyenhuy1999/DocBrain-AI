@@ -23,3 +23,7 @@ export interface CreateDocumentDto {
   sourceUrl?: string
   markdown?: string
 }
+
+export interface DocumentListItem extends Document {
+  chunkCount: number
+}

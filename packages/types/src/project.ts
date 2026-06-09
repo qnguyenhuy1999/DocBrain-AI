@@ -18,12 +18,22 @@ export interface CreateProjectDto {
 
 export interface UpdateProjectDto {
   name?: string
+  rootUrl?: string
   description?: string
   status?: ProjectStatus
 }
 
 export interface IndexProjectDto {
   maxPages?: number
+}
+
+export interface ProjectOverview extends Project {
+  documentCount: number
+  readyCount: number
+  failedCount: number
+  processingCount: number
+  pendingCount: number
+  lastIndexedAt?: Date | null
 }
 
 export interface ProjectIndexSummary {
@@ -35,6 +45,5 @@ export interface ProjectIndexSummary {
 
 export interface IndexProjectResponse {
   projectId: ID
-  status: 'COMPLETED'
-  summary: ProjectIndexSummary
+  status: 'STARTED' | 'ALREADY_RUNNING'
 }
