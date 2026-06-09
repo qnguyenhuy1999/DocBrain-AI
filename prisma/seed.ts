@@ -31,7 +31,11 @@ async function main(): Promise<void> {
       title: 'Getting Started with DocBrain',
       sourceType: DocumentSourceType.URL,
       sourceUrl: 'https://docs.docbrain.ai/getting-started',
+      markdown:
+        '# Getting Started with DocBrain\n\nDocBrain AI helps teams ingest and search documentation.',
+      contentHash: 'demo-docbrain-getting-started',
       status: 'READY',
+      indexedAt: new Date(),
     },
   })
 
@@ -44,9 +48,12 @@ async function main(): Promise<void> {
         documentId: document.id,
         content:
           'DocBrain AI is a powerful documentation intelligence platform that allows you to ingest, search, and query your documentation using natural language.',
+        section: 'Introduction',
         tokenCount: 32,
         chunkIndex: 0,
-        metadata: { section: 'Introduction' },
+        startOffset: 0,
+        endOffset: 147,
+        metadata: { source: 'seed' },
       },
     }),
     prisma.chunk.create({
@@ -54,9 +61,12 @@ async function main(): Promise<void> {
         documentId: document.id,
         content:
           'To get started, create a project and add your documentation sources. DocBrain supports URLs, file uploads, and manual text entry.',
+        section: 'Quick Start',
         tokenCount: 28,
         chunkIndex: 1,
-        metadata: { section: 'Quick Start' },
+        startOffset: 148,
+        endOffset: 276,
+        metadata: { source: 'seed' },
       },
     }),
     prisma.chunk.create({
@@ -64,9 +74,12 @@ async function main(): Promise<void> {
         documentId: document.id,
         content:
           'Once your documents are ingested, you can start a conversation with your documentation using the chat interface.',
+        section: 'Usage',
         tokenCount: 24,
         chunkIndex: 2,
-        metadata: { section: 'Usage' },
+        startOffset: 277,
+        endOffset: 386,
+        metadata: { source: 'seed' },
       },
     }),
   ])

@@ -2,9 +2,10 @@ import { z } from 'zod'
 
 export const CreateDocumentSchema = z.object({
   projectId: z.string().uuid(),
-  url: z.string().url(),
   title: z.string().min(1).max(500),
-  content: z.string().min(1),
+  sourceType: z.enum(['URL', 'FILE', 'MANUAL']),
+  sourceUrl: z.string().url().optional(),
+  markdown: z.string().min(1).optional(),
 })
 
 export type CreateDocumentInput = z.infer<typeof CreateDocumentSchema>

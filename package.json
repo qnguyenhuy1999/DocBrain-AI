@@ -12,13 +12,14 @@
     "web:dev": "turbo dev --filter=@docbrain/web",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\" --ignore-path .gitignore",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\" --ignore-path .gitignore",
-    "db:generate": "pnpm --filter @docbrain/api exec env PRISMA_GENERATE_SKIP_AUTOINSTALL=1 prisma generate",
+    "db:generate": "pnpm --filter @docbrain/api exec prisma generate",
     "db:migrate": "pnpm --filter @docbrain/api exec prisma migrate dev",
     "db:studio": "pnpm --filter @docbrain/api exec prisma studio",
     "db:reset": "pnpm --filter @docbrain/api exec prisma migrate reset",
     "db:seed": "pnpm --filter @docbrain/api exec prisma db seed"
   },
   "devDependencies": {
+    "@docbrain/eslint-config": "workspace:*",
     "@types/node": "^24.0.1",
     "prettier": "^3.5.3",
     "turbo": "^2.5.4",

@@ -52,13 +52,16 @@ model Project {
 }
 
 model Document {
-  id          String             @id @default(uuid())
-  projectId   String
-  title       String
-  sourceType  DocumentSourceType
-  sourceUrl   String?
-  contentHash String?
-  status      DocumentStatus     @default(PENDING)
+  id           String             @id @default(uuid())
+  projectId    String
+  title        String
+  sourceType   DocumentSourceType
+  sourceUrl    String?
+  markdown     String?
+  contentHash  String?
+  status       DocumentStatus     @default(PENDING)
+  errorMessage String?
+  indexedAt    DateTime?
 
   project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
   chunks  Chunk[]
@@ -72,12 +75,15 @@ model Document {
 }
 
 model Chunk {
-  id         String @id @default(uuid())
-  documentId String
-  content    String
-  tokenCount Int
-  chunkIndex Int
-  metadata   Json?
+  id          String @id @default(uuid())
+  documentId  String
+  content     String
+  section     String?
+  tokenCount  Int
+  chunkIndex  Int
+  startOffset Int?
+  endOffset   Int?
+  metadata    Json?
 
   document  Document   @relation(fields: [documentId], references: [id], onDelete: Cascade)
   embedding Embedding?
