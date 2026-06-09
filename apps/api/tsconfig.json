@@ -2,10 +2,10 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "baseUrl": ".",
-    "outDir": "./dist",
     "module": "CommonJS",
     "moduleResolution": "Node",
     "target": "ES2022",
+    "noEmit": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "paths": {
@@ -14,5 +14,6 @@
       "@docbrain/config": ["../../packages/config/src"]
     }
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": ["dist", "node_modules"]
 }

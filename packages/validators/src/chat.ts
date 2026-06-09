@@ -1,14 +1,12 @@
 import { z } from 'zod'
 
-export const ChatSchema = z.object({
-  conversationId: z.string().uuid(),
-  message: z.string().min(1).max(10000),
-})
-
 export const CreateConversationSchema = z.object({
-  projectId: z.string().uuid(),
-  title: z.string().max(200).optional(),
+  title: z.string().trim().min(1).max(200).optional(),
 })
 
-export type ChatInput = z.infer<typeof ChatSchema>
+export const SendMessageSchema = z.object({
+  message: z.string().trim().min(1).max(10000),
+})
+
 export type CreateConversationInput = z.infer<typeof CreateConversationSchema>
+export type SendMessageInput = z.infer<typeof SendMessageSchema>

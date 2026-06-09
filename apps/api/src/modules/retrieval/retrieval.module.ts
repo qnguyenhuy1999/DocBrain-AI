@@ -10,5 +10,6 @@ import { VectorSearchService } from './services/vector-search.service'
   imports: [DatabaseModule, IngestionModule],
   controllers: [RetrievalController],
   providers: [RetrievalService, VectorSearchService, RetrievalFormatterService],
+  exports: [RetrievalService],
 })
 export class RetrievalModule {}

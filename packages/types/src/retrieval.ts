@@ -13,5 +13,8 @@ export interface RetrievalMatch {
 
 export interface RetrieveResponse {
   query: string
+  topK: number
+  returnedCount: number
+  minScore?: number
   matches: RetrievalMatch[]
 }

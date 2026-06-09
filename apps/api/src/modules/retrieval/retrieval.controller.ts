@@ -13,6 +13,9 @@ export class RetrievalController {
     @Body() body?: unknown,
   ): Promise<RetrieveResponse> {
     const input = parseRetrieveDto(body)
-    return this.retrievalService.retrieve(projectId, input.query, input.topK ?? 5)
+    return this.retrievalService.retrieve(projectId, input.query, {
+      topK: input.topK,
+      minScore: input.minScore,
+    })
   }
 }

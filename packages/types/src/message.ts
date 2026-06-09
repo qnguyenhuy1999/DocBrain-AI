@@ -1,24 +1,34 @@
-import type { ID, Timestamps } from './common'
+import type { ID } from './common'
 
 export type MessageRole = 'USER' | 'ASSISTANT' | 'SYSTEM'
 
-export interface MessageSource {
+export interface Citation {
   chunkId: ID
   documentId: ID
-  url: string
   title: string
-  relevanceScore: number
+  sourceUrl?: string | null
+  section?: string | null
+  score: number
 }
-export interface Message extends Timestamps {
+
+export interface Message {
   id: ID
   conversationId: ID
   role: MessageRole
   content: string
-  sources?: MessageSource[]
+  citations?: Citation[]
+  createdAt: Date
 }
+
 export interface CreateMessageDto {
   conversationId: ID
   role: MessageRole
   content: string
-  sources?: MessageSource[]
+  citations?: Citation[]
+}
+
+export interface ChatResponse {
+  conversationId: ID
+  userMessage: Message
+  assistantMessage: Message
 }

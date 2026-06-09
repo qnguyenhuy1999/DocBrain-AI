@@ -4,6 +4,11 @@ export const EMBEDDING_MODEL = 'text-embedding-3-small' as const
 export const EMBEDDING_DIMENSIONS = 1536 as const
 export const EMBEDDING_BATCH_SIZE = 20 as const
 export const MIN_EXTRACTED_TEXT_LENGTH = 50 as const
+export const CHAT_MODEL = 'gpt-4.1-mini' as const
+export const CHAT_TEMPERATURE = 0.2 as const
+export const CHAT_MAX_OUTPUT_TOKENS = 1200 as const
+export const RAG_TOP_K = 5 as const
+export const MIN_RETRIEVAL_SCORE = 0.35 as const
 
 const envSchema = z.object({
   DATABASE_URL: z.string().url(),

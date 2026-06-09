@@ -2,12 +2,24 @@ import type { RetrieveResponse, RetrievalMatch } from '@docbrain/types'
 import { Injectable } from '@nestjs/common'
 import type { RetrievalRow } from './vector-search.service'
 
+interface RetrievalFormatOptions {
+  topK: number
+  minScore?: number
+}
+
 @Injectable()
 export class RetrievalFormatterService {
-  format(query: string, rows: RetrievalRow[]): RetrieveResponse {
+  format(query: string, rows: RetrievalRow[], options: RetrievalFormatOptions): RetrieveResponse {
+    const matches = rows
+      .map((row) => this.formatRow(row))
+      .filter((row) => options.minScore === undefined || row.score >= options.minScore)
+
     return {
       query,
-      matches: rows.map((row) => this.formatRow(row)),
+      topK: options.topK,
+      returnedCount: matches.length,
+      minScore: options.minScore,
+      matches,
     }
   }
 
