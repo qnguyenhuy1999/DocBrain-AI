@@ -7,13 +7,127 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ─── Enums ────────────────────────────────────────────────────────────────────
+
+enum ProjectStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+enum DocumentStatus {
+  PENDING
+  PROCESSING
+  READY
+  FAILED
+}
+
+enum DocumentSourceType {
+  URL
+  FILE
+  MANUAL
+}
+
+enum MessageRole {
+  USER
+  ASSISTANT
+  SYSTEM
+}
+
+// ─── Models ───────────────────────────────────────────────────────────────────
+
 model Project {
-  id        String   @id @default(uuid())
-  name      String
-  rootUrl   String
-  status    String   @default("active")
+  id          String        @id @default(uuid())
+  name        String
+  description String?
+  rootUrl     String?
+  status      ProjectStatus @default(ACTIVE)
+
+  documents     Document[]
+  conversations Conversation[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("projects")
+}
+
+model Document {
+  id          String             @id @default(uuid())
+  projectId   String
+  title       String
+  sourceType  DocumentSourceType
+  sourceUrl   String?
+  contentHash String?
+  status      DocumentStatus     @default(PENDING)
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  chunks  Chunk[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([projectId])
+  @@unique([projectId, sourceUrl])
+  @@map("documents")
+}
+
+model Chunk {
+  id         String @id @default(uuid())
+  documentId String
+  content    String
+  tokenCount Int
+  chunkIndex Int
+  metadata   Json?
+
+  document  Document   @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  embedding Embedding?
+
+  createdAt DateTime @default(now())
+
+  @@index([documentId])
+  @@unique([documentId, chunkIndex])
+  @@map("chunks")
+}
+
+model Embedding {
+  id      String @id @default(uuid())
+  chunkId String @unique
+  model   String
+  vector  Unsupported("vector(1536)")
+
+  chunk Chunk @relation(fields: [chunkId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@map("embeddings")
+}
+
+model Conversation {
+  id        String  @id @default(uuid())
+  projectId String
+  title     String?
+
+  project  Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  messages Message[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([projectId])
+  @@map("conversations")
+}
+
+model Message {
+  id             String      @id @default(uuid())
+  conversationId String
+  role           MessageRole
+  content        String
+  citations      Json?
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([conversationId])
+  @@map("messages")
 }

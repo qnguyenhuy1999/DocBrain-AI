@@ -1,7 +1,7 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "outDir": "./dist", "rootDir": "./src",
+    "outDir": "./dist",
     "module": "CommonJS", "moduleResolution": "Node", "target": "ES2022",
     "emitDecoratorMetadata": true, "experimentalDecorators": true,
     "paths": {

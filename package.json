@@ -11,12 +11,20 @@
     "api:dev": "turbo dev --filter=@docbrain/api",
     "web:dev": "turbo dev --filter=@docbrain/web",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\" --ignore-path .gitignore",
-    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\" --ignore-path .gitignore"
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\" --ignore-path .gitignore",
+    "db:generate": "pnpm --filter @docbrain/api exec env PRISMA_GENERATE_SKIP_AUTOINSTALL=1 prisma generate",
+    "db:migrate": "pnpm --filter @docbrain/api exec prisma migrate dev",
+    "db:studio": "pnpm --filter @docbrain/api exec prisma studio",
+    "db:reset": "pnpm --filter @docbrain/api exec prisma migrate reset",
+    "db:seed": "pnpm --filter @docbrain/api exec prisma db seed"
   },
   "devDependencies": {
-    "turbo": "^2.5.4",
-    "typescript": "^5.9.2",
+    "@types/node": "^24.0.1",
     "prettier": "^3.5.3",
-    "@types/node": "^24.0.1"
+    "turbo": "^2.5.4",
+    "typescript": "^5.9.2"
+  },
+  "dependencies": {
+    "@prisma/client": "6.19.3"
   }
 }
