@@ -1,11 +1,9 @@
 import { randomUUID } from 'crypto'
 import { Injectable } from '@nestjs/common'
+import { EMBEDDING_BATCH_SIZE, EMBEDDING_DIMENSIONS, EMBEDDING_MODEL } from '@docbrain/config'
 import { Prisma } from '@prisma/client'
 import OpenAI from 'openai'
-
-const EMBEDDING_MODEL = 'text-embedding-3-small'
-const EMBEDDING_DIMENSIONS = 1536
-const EMBEDDING_BATCH_SIZE = 20
+import { toVectorSql } from '../../../common/vector/vector-sql'
 
 @Injectable()
 export class EmbeddingService {
@@ -30,13 +28,26 @@ export class EmbeddingService {
     return embeddings
   }
 
+  async embedQuery(query: string): Promise<number[]> {
+    const response = await this.client.embeddings.create({
+      model: EMBEDDING_MODEL,
+      input: query,
+      dimensions: EMBEDDING_DIMENSIONS,
+    })
+
+    const embedding = response.data[0]?.embedding
+    if (!embedding) {
+      throw new Error('Embedding response did not include a query vector')
+    }
+
+    return embedding
+  }
+
   async storeEmbeddings(
     prisma: Prisma.TransactionClient,
     records: Array<{ chunkId: string; vector: number[] }>,
   ): Promise<void> {
     for (const record of records) {
-      const vectorLiteral = `[${record.vector.map((value) => Number(value).toFixed(8)).join(',')}]`
-
       await prisma.$executeRaw(
         Prisma.sql`
           INSERT INTO "embeddings" ("id", "chunkId", "model", "vector", "createdAt")
@@ -44,7 +55,7 @@ export class EmbeddingService {
             ${randomUUID()},
             ${record.chunkId},
             ${EMBEDDING_MODEL},
-            ${Prisma.raw(`'${vectorLiteral}'::vector`)},
+            ${toVectorSql(record.vector)},
             NOW()
           )
           ON CONFLICT ("chunkId")

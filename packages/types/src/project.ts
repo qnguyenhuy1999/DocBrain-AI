@@ -26,8 +26,15 @@ export interface IndexProjectDto {
   maxPages?: number
 }
 
+export interface ProjectIndexSummary {
+  totalDiscovered: number
+  indexedCount: number
+  skippedCount: number
+  failedCount: number
+}
+
 export interface IndexProjectResponse {
   projectId: ID
-  status: 'PROCESSING'
-  queued: true
+  status: 'COMPLETED'
+  summary: ProjectIndexSummary
 }

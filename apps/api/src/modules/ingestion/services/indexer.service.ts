@@ -1,5 +1,7 @@
 import { createHash } from 'crypto'
-import { Injectable, Logger } from '@nestjs/common'
+import { Injectable, Logger, NotFoundException } from '@nestjs/common'
+import { MIN_EXTRACTED_TEXT_LENGTH } from '@docbrain/config'
+import type { ProjectIndexSummary } from '@docbrain/types'
 import { DocumentSourceType, DocumentStatus, Prisma } from '@prisma/client'
 import pLimit from 'p-limit'
 import { PrismaService } from '../../database/prisma.service'
@@ -29,14 +31,14 @@ export class IndexerService {
     private readonly embeddingService: EmbeddingService,
   ) {}
 
-  async indexProject(projectId: string, maxPages: number): Promise<void> {
+  async indexProject(projectId: string, maxPages: number): Promise<ProjectIndexSummary> {
     const project = await this.prisma.project.findUnique({
       where: { id: projectId },
       select: { id: true, rootUrl: true },
     })
 
     if (!project) {
-      throw new Error(`Project ${projectId} was not found`)
+      throw new NotFoundException(`Project ${projectId} was not found`)
     }
 
     if (!project.rootUrl) {
@@ -46,21 +48,35 @@ export class IndexerService {
     const rootUrl = project.rootUrl
     const discoveredUrls = await this.discoverProjectUrls(rootUrl, maxPages)
     const limit = pLimit(CONCURRENCY)
+    const summary: ProjectIndexSummary = {
+      totalDiscovered: discoveredUrls.length,
+      indexedCount: 0,
+      skippedCount: 0,
+      failedCount: 0,
+    }
 
-    await Promise.allSettled(
+    const results = await Promise.allSettled(
       discoveredUrls.map((url) =>
         limit(async () => {
-          try {
-            await this.indexUrl(projectId, url)
-          } catch (error) {
-            this.logger.error(
-              `Indexing failed for ${url} at stage=document`,
-              error instanceof Error ? error.stack : undefined,
-            )
-          }
+          return this.indexUrl(projectId, url)
         }),
       ),
     )
+
+    for (const result of results) {
+      if (result.status === 'fulfilled') {
+        summary[`${result.value}Count`] += 1
+        continue
+      }
+
+      summary.failedCount += 1
+      this.logger.error(
+        'Indexing failed at stage=document',
+        result.reason instanceof Error ? result.reason.stack : undefined,
+      )
+    }
+
+    return summary
   }
 
   private async discoverProjectUrls(rootUrl: string, maxPages: number): Promise<string[]> {
@@ -76,7 +92,7 @@ export class IndexerService {
     return [...new Set([...seedUrls, ...fallbackUrls])].slice(0, maxPages)
   }
 
-  private async indexUrl(projectId: string, url: string): Promise<void> {
+  private async indexUrl(projectId: string, url: string): Promise<'indexed' | 'skipped'> {
     let documentId: string | null = null
 
     try {
@@ -114,6 +130,12 @@ export class IndexerService {
         crawledPage.url,
       )
       const markdown = this.markdownConverterService.convert(extractedContent.html)
+      if (markdown.length < MIN_EXTRACTED_TEXT_LENGTH) {
+        throw new Error(
+          `Extracted markdown was too short: expected at least ${MIN_EXTRACTED_TEXT_LENGTH} characters`,
+        )
+      }
+
       const contentHash = this.hashContent(markdown)
 
       const existingDocument = await this.prisma.document.findUnique({
@@ -153,7 +175,7 @@ export class IndexerService {
         })
 
         this.logger.log(`Skipped unchanged document ${url}`)
-        return
+        return 'skipped'
       }
 
       const chunks = this.chunkerService.chunk(markdown)
@@ -222,6 +244,7 @@ export class IndexerService {
       })
 
       this.logger.log(`Indexed ${url}`)
+      return 'indexed'
     } catch (error) {
       this.logger.error(`Indexing failed for ${url} at stage=page: ${this.getErrorMessage(error)}`)
 
@@ -234,6 +257,8 @@ export class IndexerService {
           },
         })
       }
+
+      throw error
     }
   }
 

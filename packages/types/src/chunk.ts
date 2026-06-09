@@ -1,6 +1,6 @@
-import type { ID, Timestamps } from './common'
+import type { ID } from './common'
 
-export interface Chunk extends Timestamps {
+export interface Chunk {
   id: ID
   documentId: ID
   content: string
@@ -9,7 +9,8 @@ export interface Chunk extends Timestamps {
   chunkIndex: number
   startOffset?: number | null
   endOffset?: number | null
-  metadata?: Record<string, unknown> | null
+  metadata?: unknown | null
+  createdAt: Date
 }
 
 export interface CreateChunkDto {

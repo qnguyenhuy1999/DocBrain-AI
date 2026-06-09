@@ -25,5 +25,6 @@ import { SitemapDiscoveryService } from './services/sitemap-discovery.service'
     EmbeddingService,
     IndexerService,
   ],
+  exports: [EmbeddingService],
 })
 export class IngestionModule {}

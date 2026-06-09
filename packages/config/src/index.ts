@@ -1,5 +1,10 @@
 import { z } from 'zod'
 
+export const EMBEDDING_MODEL = 'text-embedding-3-small' as const
+export const EMBEDDING_DIMENSIONS = 1536 as const
+export const EMBEDDING_BATCH_SIZE = 20 as const
+export const MIN_EXTRACTED_TEXT_LENGTH = 50 as const
+
 const envSchema = z.object({
   DATABASE_URL: z.string().url(),
   REDIS_URL: z.string().url(),
