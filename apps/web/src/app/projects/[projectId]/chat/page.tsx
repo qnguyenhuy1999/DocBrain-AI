@@ -69,7 +69,7 @@ export default function ProjectChatPage({
 
   if (conversations.isLoading) {
     return (
-      <AppShell title="Chat" description="Grounded chat over indexed documentation." projectId={projectId} projectName={project.data?.name}>
+      <AppShell projectId={projectId} projectName={project.data?.name}>
         <LoadingState title="Loading conversations" description="Fetching existing threads for this project." />
       </AppShell>
     )
@@ -77,7 +77,7 @@ export default function ProjectChatPage({
 
   if (conversations.error) {
     return (
-      <AppShell title="Chat" description="Grounded chat over indexed documentation." projectId={projectId} projectName={project.data?.name}>
+      <AppShell projectId={projectId} projectName={project.data?.name}>
         <ErrorState title="Could not load conversations" message={conversations.error.message} />
       </AppShell>
     )
@@ -88,39 +88,49 @@ export default function ProjectChatPage({
 
   return (
     <AppShell
-      title="Chat with indexed docs"
-      description="Messages stay grounded in retrieved chunks, and assistant replies expose citations under each answer."
       projectId={projectId}
       projectName={project.data?.name}
     >
-      <div className="grid gap-6 overflow-x-hidden lg:grid-cols-[320px_minmax(0,1fr)]">
-        <ConversationSidebar
-          conversations={conversations.data ?? []}
-          isCreatingConversation={createConversation.isPending}
-          onCreateConversation={() => void handleCreateConversation()}
-          onSelectConversation={setSelectedConversationId}
-          selectedConversationId={selectedConversationId}
-        />
-        <div className="min-w-0 rounded-3xl border border-white/60 bg-amber-50/60 p-4">
-          {messages.error ? <ErrorState title="Could not load messages" message={messages.error.message} /> : null}
-          {displayMessages.length === 0 ? (
-            <div className="rounded-3xl border border-dashed border-slate-300 bg-white/80 p-8 text-center">
-              <p className="text-sm font-medium text-slate-700">Ask a question about this project's docs</p>
-              <p className="mt-1 text-xs text-slate-500">Based on indexed documentation</p>
-            </div>
-          ) : (
-            <MessageList messages={displayMessages} />
-          )}
-          {sendMessage.error ? (
-            <div className="mt-4">
-              <ErrorState title="AI generation failed" message={sendMessage.error.message} />
-            </div>
-          ) : null}
-          <div className="mt-6">
-            <MessageInput isPending={sendMessage.isPending} onSend={handleSend} />
+      <section className="container py-6">
+        <div className="flex items-start justify-between gap-4 mb-4">
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight">Chat with docs</h1>
+            <p className="text-sm mt-1" style={{ color: 'var(--muted-foreground)' }}>Ask questions, get cited answers.</p>
           </div>
         </div>
-      </div>
+        <div className="grid gap-4 md:grid-cols-[260px_1fr]" style={{ height: 'calc(100vh - 220px)', minHeight: '520px' }}>
+          <ConversationSidebar
+            conversations={conversations.data ?? []}
+            isCreatingConversation={createConversation.isPending}
+            onCreateConversation={() => void handleCreateConversation()}
+            onSelectConversation={setSelectedConversationId}
+            selectedConversationId={selectedConversationId}
+          />
+          <div className="rounded-lg border flex flex-col h-full overflow-hidden" style={{ background: 'var(--card)' }}>
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              {messages.error ? <ErrorState title="Could not load messages" message={messages.error.message} /> : null}
+              {displayMessages.length === 0 ? (
+                <div className="h-full grid place-items-center text-center" style={{ color: 'var(--muted-foreground)' }}>
+                  <div className="max-w-sm">
+                    <div className="font-medium" style={{ color: 'var(--foreground)' }}>Start a conversation</div>
+                    <p className="text-sm mt-1">Ask anything about the indexed documentation.</p>
+                  </div>
+                </div>
+              ) : (
+                <MessageList messages={displayMessages} />
+              )}
+            </div>
+            {sendMessage.error ? (
+              <div className="px-4 pb-2">
+                <ErrorState title="AI generation failed" message={sendMessage.error.message} />
+              </div>
+            ) : null}
+            <div className="border-t p-3">
+              <MessageInput isPending={sendMessage.isPending} onSend={handleSend} />
+            </div>
+          </div>
+        </div>
+      </section>
     </AppShell>
   )
 }

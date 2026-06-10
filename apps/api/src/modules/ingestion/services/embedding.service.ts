@@ -136,6 +136,30 @@ export class EmbeddingService {
     }
 
     const code = error.error?.code
-    return code === undefined ? message : `${message} (code: ${code})`
+    return this.formatProviderError(message, code)
+  }
+
+  private formatProviderError(message: string, code?: number | string): string {
+    const normalizedMessage = code === undefined ? message : `${message} (code: ${code})`
+    if (!this.isOpenRouterCreditLimitError(message, code)) {
+      return normalizedMessage
+    }
+
+    return `${normalizedMessage}. OpenRouter rejected the embedding request because this account's prompt-token cap is too small for document indexing. Upgrade the OpenRouter account credits or point OPENAI_EMBEDDING_BASE_URL and OPENAI_EMBEDDING_API_KEY at an embedding provider with a larger context window.`
+  }
+
+  private isOpenRouterCreditLimitError(message: string, code?: number | string): boolean {
+    const baseUrl = process.env.OPENAI_EMBEDDING_BASE_URL?.toLowerCase() ?? ''
+    if (!baseUrl.includes('openrouter.ai')) {
+      return false
+    }
+
+    const normalizedCode = typeof code === 'string' ? code.trim() : code
+    const normalizedMessage = message.toLowerCase()
+
+    return (
+      normalizedCode === 402 &&
+      normalizedMessage.includes('prompt tokens limit exceeded')
+    )
   }
 }

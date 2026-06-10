@@ -24,16 +24,22 @@ export default function ProjectRetrievePage({
       projectId={projectId}
       projectName={project.data?.name}
     >
-      <div className="grid gap-6">
-        <RetrievalForm
-          isPending={retrieve.isPending}
-          onSubmit={async (input) => {
-            await retrieve.mutateAsync(input)
-          }}
-        />
-        {retrieve.error ? <ErrorState title="Retrieval failed" message={retrieve.error.message} /> : null}
-        <RetrievalResults result={retrieve.data} />
-      </div>
+      <section className="container py-8">
+        <div className="mb-6">
+          <h1 className="text-2xl font-semibold tracking-tight">Retrieval playground</h1>
+          <p className="text-sm mt-1" style={{ color: 'var(--muted-foreground)' }}>Probe retrieval quality directly. Inspect scores, sections, and source URLs.</p>
+        </div>
+        <div className="grid gap-6">
+          <RetrievalForm
+            isPending={retrieve.isPending}
+            onSubmit={async (input) => {
+              await retrieve.mutateAsync(input)
+            }}
+          />
+          {retrieve.error ? <ErrorState title="Retrieval failed" message={retrieve.error.message} /> : null}
+          <RetrievalResults result={retrieve.data} />
+        </div>
+      </section>
     </AppShell>
   )
 }

@@ -99,7 +99,7 @@ model Embedding {
   id      String @id @default(uuid())
   chunkId String @unique
   model   String
-  vector  Unsupported("vector(3072)")
+  vector Unsupported("vector(192)")
 
   chunk Chunk @relation(fields: [chunkId], references: [id], onDelete: Cascade)
 

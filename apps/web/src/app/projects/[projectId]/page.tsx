@@ -70,20 +70,21 @@ export default function ProjectDetailPage({
   return (
     <AppShell
       title={project.data.name}
-      description="Project overview, indexing controls, and direct links into ingestion, retrieval, and chat debugging."
       projectId={projectId}
       projectName={project.data.name}
     >
-      <ProjectOverview
-        indexError={indexProject.error?.message}
-        indexFeedback={indexFeedback}
-        isIndexing={indexProject.isPending}
-        onIndex={() => void handleIndex()}
-        onArchive={() => {
-          void archiveProject.mutateAsync().then(() => router.push('/projects'))
-        }}
-        project={project.data}
-      />
+      <section className="container py-8">
+        <ProjectOverview
+          indexError={indexProject.error?.message}
+          indexFeedback={indexFeedback}
+          isIndexing={indexProject.isPending}
+          onIndex={() => void handleIndex()}
+          onArchive={() => {
+            void archiveProject.mutateAsync().then(() => router.push('/projects'))
+          }}
+          project={project.data}
+        />
+      </section>
     </AppShell>
   )
 }

@@ -3,11 +3,16 @@ import { ProjectForm } from '@/features/projects/project-form'
 
 export default function NewProjectPage() {
   return (
-    <AppShell
-      title="New project"
-      description="Create a crawl target with a root URL. The crawler and embedding pipeline will build the retrieval corpus from there."
-    >
-      <ProjectForm />
+    <AppShell>
+      <section className="container py-8">
+        <div className="mb-6">
+          <h1 className="text-2xl font-semibold tracking-tight">New project</h1>
+          <p className="text-sm mt-1" style={{ color: 'var(--muted-foreground)' }}>
+            Create a crawl target with a root URL.
+          </p>
+        </div>
+        <ProjectForm />
+      </section>
     </AppShell>
   )
 }

@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
 export const EMBEDDING_MODEL = 'text-embedding-3-small' as const
-export const DEFAULT_EMBEDDING_DIMENSIONS = 3072 as const
+export const DEFAULT_EMBEDDING_DIMENSIONS = 192 as const
 export const EMBEDDING_DIMENSIONS = z.coerce
   .number()
   .int()

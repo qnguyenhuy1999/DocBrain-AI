@@ -2,143 +2,106 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { cn } from '@docbrain/ui'
 
-const topNavItems = [
-  { href: '/projects', label: 'Projects' },
-  { href: '/projects/new', label: 'New project' },
-]
+const BrainIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/>
+    <path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/>
+    <path d="M15 13a4.5 4.5 0 0 1-3-4 4.5 4.5 0 0 1-3 4"/>
+    <path d="M17.599 6.5a3 3 0 0 0 .399-1.375"/>
+    <path d="M6.003 5.125A3 3 0 0 0 6.401 6.5"/>
+    <path d="M3.477 10.896a4 4 0 0 1 .585-.396"/>
+    <path d="M19.938 10.5a4 4 0 0 1 .585.396"/>
+    <path d="M6 18a4 4 0 0 1-1.967-.516"/>
+    <path d="M19.967 17.484A4 4 0 0 1 18 18"/>
+  </svg>
+)
 
-const projectSubNav = [
+const FolderIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/>
+    <path d="M8 10v4"/><path d="M12 10v2"/><path d="M16 10v6"/>
+  </svg>
+)
+
+const PROJECT_TABS = [
   { segment: '', label: 'Overview' },
   { segment: 'documents', label: 'Documents' },
-  { segment: 'retrieve', label: 'Retrieval' },
+  { segment: 'retrieve', label: 'Retrieve' },
   { segment: 'chat', label: 'Chat' },
 ]
 
-function deriveSection(pathname: string): string {
-  const segments = pathname.split('/')
-  const last = segments[segments.length - 1]
-  if (last === 'documents') return 'Documents'
-  if (last === 'retrieve') return 'Retrieval'
-  if (last === 'chat') return 'Chat'
-  return 'Overview'
-}
-
 export function AppShell({
   children,
-  title,
-  description,
-  actions,
   projectId,
   projectName,
 }: {
   children: React.ReactNode
-  title: string
+  title?: string
   description?: string
   actions?: React.ReactNode
   projectId?: string
   projectName?: string
 }) {
   const pathname = usePathname()
+  const isProjectsActive = pathname.startsWith('/projects')
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-[radial-gradient(circle_at_top_left,rgba(245,158,11,0.18),transparent_28%),linear-gradient(180deg,#fffdf7_0%,#fff8ec_100%)] text-slate-950">
-      <div className="mx-auto flex min-h-screen max-w-7xl gap-6 px-4 py-6 sm:px-6 lg:px-8">
-        <aside className="hidden w-60 shrink-0 rounded-3xl border border-amber-200/70 bg-white/80 p-5 shadow-[0_20px_60px_rgba(120,53,15,0.08)] backdrop-blur md:block">
-          <Link href="/" className="block border-b border-amber-100 pb-5">
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-700">
-              DocBrain
-            </p>
-            <h1 className="mt-2 text-2xl font-semibold tracking-tight text-slate-900">
-              Ops Console
-            </h1>
-            <p className="mt-2 text-sm text-slate-600">
-              Inspect ingestion, retrieval, and grounded chat in one place.
-            </p>
+    <div className="min-h-screen flex flex-col" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>
+      <header className="sticky top-0 z-30 border-b backdrop-blur" style={{ background: 'color-mix(in srgb, var(--card) 80%, transparent)' }}>
+        <div className="container flex h-14 items-center gap-4">
+          <Link href="/" className="flex items-center gap-2 font-semibold">
+            <span className="grid h-8 w-8 place-items-center rounded-lg" style={{ background: 'var(--primary)', color: 'var(--primary-foreground)' }}>
+              <BrainIcon />
+            </span>
+            <span>DocBrain AI</span>
           </Link>
-          <nav className="mt-5 space-y-2">
-            {topNavItems.map((item) => {
-              const active = pathname === item.href || pathname.startsWith(`${item.href}/`)
+          <nav className="hidden md:flex items-center gap-1 ml-4">
+            <Link
+              href="/projects"
+              className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm transition-colors"
+              style={isProjectsActive
+                ? { background: 'var(--secondary)', color: 'var(--foreground)' }
+                : { color: 'var(--muted-foreground)' }
+              }
+            >
+              <FolderIcon />
+              Projects
+            </Link>
+          </nav>
+          <div className="ml-auto hidden sm:flex items-center gap-1.5 text-xs" style={{ color: 'var(--muted-foreground)' }}>
+            <span className="inline-flex h-1.5 w-1.5 rounded-full animate-pulse-dot" style={{ background: 'var(--success)' }} />
+            <span>Connected</span>
+          </div>
+        </div>
+        {projectId ? (
+          <div className="container flex items-center gap-1 overflow-x-auto border-t -mb-px">
+            {PROJECT_TABS.map((tab) => {
+              const href = tab.segment === '' ? `/projects/${projectId}` : `/projects/${projectId}/${tab.segment}`
+              const active = tab.segment === '' ? pathname === href : pathname.startsWith(href)
               return (
                 <Link
-                  key={item.href}
-                  href={item.href}
-                  className={cn(
-                    'block rounded-2xl px-4 py-3 text-sm font-medium transition',
-                    active
-                      ? 'bg-slate-950 text-white shadow-lg shadow-slate-950/10'
-                      : 'text-slate-700 hover:bg-amber-50 hover:text-slate-950',
-                  )}
+                  key={href}
+                  href={href}
+                  className="px-3 h-10 inline-flex items-center text-sm border-b-2 whitespace-nowrap transition-colors"
+                  style={active
+                    ? { borderColor: 'var(--primary)', color: 'var(--foreground)' }
+                    : { borderColor: 'transparent', color: 'var(--muted-foreground)' }
+                  }
                 >
-                  {item.label}
+                  {tab.label}
                 </Link>
               )
             })}
-            {projectId ? (
-              <div className="mt-4 border-t border-amber-100 pt-4">
-                <p className="mb-2 px-4 text-xs font-semibold uppercase tracking-[0.2em] text-amber-600">
-                  {projectName ?? 'Project'}
-                </p>
-                {projectSubNav.map((item) => {
-                  const href =
-                    item.segment === ''
-                      ? `/projects/${projectId}`
-                      : `/projects/${projectId}/${item.segment}`
-                  const active =
-                    item.segment === ''
-                      ? pathname === href
-                      : pathname === href || pathname.startsWith(`${href}/`)
-                  return (
-                    <Link
-                      key={href}
-                      href={href}
-                      className={cn(
-                        'block rounded-2xl px-4 py-2.5 text-sm font-medium transition',
-                        active
-                          ? 'bg-amber-100 text-amber-900'
-                          : 'text-slate-600 hover:bg-amber-50 hover:text-slate-950',
-                      )}
-                    >
-                      {item.label}
-                    </Link>
-                  )
-                })}
-              </div>
-            ) : null}
-          </nav>
-        </aside>
-        <div className="min-w-0 flex-1">
-          {projectId ? (
-            <div className="mb-3 flex items-center gap-2 px-1 text-sm text-slate-500">
-              <Link href="/projects" className="hover:text-slate-700">
-                Projects
-              </Link>
-              <span>/</span>
-              <Link href={`/projects/${projectId}`} className="hover:text-slate-700">
-                {projectName ?? 'Project'}
-              </Link>
-              <span>/</span>
-              <span className="font-medium text-slate-800">{deriveSection(pathname)}</span>
-            </div>
-          ) : null}
-          <header className="rounded-3xl border border-white/60 bg-white/85 px-6 py-5 shadow-[0_20px_50px_rgba(15,23,42,0.08)] backdrop-blur">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-700">
-                  Documentation intelligence
-                </p>
-                <h2 className="mt-2 text-3xl font-semibold tracking-tight">{title}</h2>
-                {description ? (
-                  <p className="mt-2 max-w-3xl text-sm text-slate-600">{description}</p>
-                ) : null}
-              </div>
-              {actions ? <div className="shrink-0">{actions}</div> : null}
-            </div>
-          </header>
-          <main className="mt-6">{children}</main>
-        </div>
-      </div>
+          </div>
+        ) : null}
+      </header>
+      <main className="flex-1">
+        {children}
+      </main>
+      <footer className="border-t py-6 text-center text-xs" style={{ color: 'var(--muted-foreground)' }}>
+        DocBrain AI · Local MVP
+      </footer>
     </div>
   )
 }

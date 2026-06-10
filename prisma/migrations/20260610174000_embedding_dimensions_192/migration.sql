@@ -1,7 +1,7 @@
 DELETE FROM "embeddings";
 
 ALTER TABLE "embeddings"
-ALTER COLUMN "vector" TYPE vector(3072);
+ALTER COLUMN "vector" TYPE vector(192);
 
 UPDATE "documents" d
 SET "status" = 'PENDING',

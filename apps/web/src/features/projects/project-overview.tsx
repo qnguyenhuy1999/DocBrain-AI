@@ -2,9 +2,56 @@
 
 import type { ProjectOverview as ProjectOverviewType } from '@docbrain/types'
 import Link from 'next/link'
-import { Badge, Button, Card, CardContent, CardHeader, CardTitle, buttonVariants, cn } from '@docbrain/ui'
 import { ErrorState } from '@/components/error-state'
-import { formatDate } from '@/lib/format'
+
+function formatDate(dateStr: Date | string | null | undefined): string {
+  if (!dateStr) return '—'
+  return new Date(dateStr).toLocaleDateString('en-AU', {
+    day: '2-digit', month: 'short', year: 'numeric',
+    hour: '2-digit', minute: '2-digit',
+  })
+}
+
+function timeAgo(dateStr: Date | string | null | undefined): string {
+  if (!dateStr) return ''
+  const diff = Date.now() - new Date(dateStr).getTime()
+  const mins = Math.floor(diff / 60000)
+  if (mins < 60) return `${mins}m ago`
+  const hrs = Math.floor(mins / 60)
+  if (hrs < 24) return `${hrs}h ago`
+  return `${Math.floor(hrs / 24)}d ago`
+}
+
+function PlayIcon() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polygon points="6 3 20 12 6 21 6 3"/>
+    </svg>
+  )
+}
+
+function ArchiveIcon() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect width="20" height="5" x="2" y="3" rx="1"/>
+      <path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/>
+      <path d="M10 12h4"/>
+    </svg>
+  )
+}
+
+function StatCard({ label, value, color }: { label: string; value: number | string; color?: string }) {
+  return (
+    <div className="rounded-lg border p-4" style={{ background: 'var(--card)' }}>
+      <div className="text-xs uppercase tracking-wider" style={{ color: 'var(--muted-foreground)' }}>
+        {label}
+      </div>
+      <div className="mt-1 text-2xl font-semibold tabular-nums" style={{ color: color ?? 'var(--foreground)' }}>
+        {value}
+      </div>
+    </div>
+  )
+}
 
 export function ProjectOverview({
   project,
@@ -21,63 +68,117 @@ export function ProjectOverview({
   indexError?: string
   onArchive: () => void
 }) {
-  return (
-    <div className="grid gap-6">
-      <Card className="border-white/60 bg-white/85">
-        <CardHeader className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <div>
-            <CardTitle>{project.name}</CardTitle>
-            <p className="mt-2 text-sm text-slate-600">{project.description || 'No description provided.'}</p>
-            <p className="mt-2 text-sm text-slate-600">{project.rootUrl ?? 'No root URL configured'}</p>
-          </div>
-          <Badge variant={project.status === 'ACTIVE' ? 'success' : 'outline'}>{project.status}</Badge>
-        </CardHeader>
-        <CardContent className="space-y-5">
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-            <MetricCard label="Document count" value={project.documentCount} />
-            <MetricCard label="Ready count" value={project.readyCount} />
-            <MetricCard label="Failed count" value={project.failedCount} />
-            <MetricCard label="Processing count" value={project.processingCount} />
-            <MetricCard label="Last indexed" value={formatDate(project.lastIndexedAt)} />
-          </div>
-          <div className="flex flex-wrap gap-3">
-            <Button disabled={isIndexing} onClick={onIndex}>
-              {isIndexing ? 'Indexing...' : 'Index documentation'}
-            </Button>
-            <Link className={cn(buttonVariants({ variant: 'outline' }))} href={`/projects/${project.id}/documents`}>
-              Open documents
-            </Link>
-            <Link className={cn(buttonVariants({ variant: 'outline' }))} href={`/projects/${project.id}/retrieve`}>
-              Open retrieval playground
-            </Link>
-            <Link className={cn(buttonVariants({ variant: 'outline' }))} href={`/projects/${project.id}/chat`}>
-              Open chat
-            </Link>
-            {project.status !== 'ARCHIVED' ? (
-              <Button
-                variant="outline"
-                className="border-rose-200 text-rose-700 hover:bg-rose-50"
-                onClick={onArchive}
-              >
-                Archive project
-              </Button>
-            ) : null}
-          </div>
-          {indexFeedback ? (
-            <p className="text-sm font-medium text-emerald-700">{indexFeedback}</p>
-          ) : null}
-          {indexError ? <ErrorState title="Indexing failed" message={indexError} /> : null}
-        </CardContent>
-      </Card>
-    </div>
-  )
-}
+  const readyCount = project.readyCount ?? 0
+  const processingCount = project.processingCount ?? 0
+  const pendingCount = project.pendingCount ?? 0
+  const failedCount = project.failedCount ?? 0
 
-function MetricCard({ label, value }: { label: string; value: number | string }) {
   return (
-    <div className="rounded-2xl border border-amber-100 bg-amber-50/60 p-4">
-      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-700">{label}</p>
-      <p className="mt-2 text-2xl font-semibold text-slate-950">{value}</p>
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="min-w-0">
+          <div className="flex items-center gap-3 flex-wrap">
+            <h1 className="text-2xl font-semibold tracking-tight truncate">{project.name}</h1>
+            <span
+              className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold"
+              style={project.status === 'ACTIVE'
+                ? { background: 'color-mix(in srgb, var(--success) 10%, transparent)', color: 'var(--success)', border: '1px solid color-mix(in srgb, var(--success) 20%, transparent)' }
+                : { border: '1px solid var(--border)', color: 'var(--muted-foreground)' }
+              }
+            >
+              {project.status === 'ACTIVE' ? 'active' : 'archived'}
+            </span>
+          </div>
+          {project.description ? (
+            <p className="text-sm mt-1 max-w-2xl" style={{ color: 'var(--muted-foreground)' }}>
+              {project.description}
+            </p>
+          ) : null}
+          {project.rootUrl ? (
+            <a
+              href={project.rootUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="mt-2 inline-flex items-center gap-1.5 text-xs font-mono transition-colors"
+              style={{ color: 'var(--muted-foreground)' }}
+            >
+              {project.rootUrl}
+            </a>
+          ) : null}
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={onIndex}
+            disabled={isIndexing}
+            className="inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium h-10 px-4 py-2 transition-colors disabled:opacity-50"
+            style={{ background: 'var(--primary)', color: 'var(--primary-foreground)' }}
+          >
+            <PlayIcon />
+            {isIndexing ? 'Indexing...' : 'Index documentation'}
+          </button>
+          <Link
+            href={`/projects/${project.id}/documents`}
+            className="inline-flex items-center justify-center rounded-md text-sm font-medium h-10 px-4 py-2 border transition-colors"
+            style={{ background: 'var(--background)', color: 'var(--foreground)', borderColor: 'var(--border)' }}
+          >
+            Documents
+          </Link>
+          <Link
+            href={`/projects/${project.id}/retrieve`}
+            className="inline-flex items-center justify-center rounded-md text-sm font-medium h-10 px-4 py-2 border transition-colors"
+            style={{ background: 'var(--background)', color: 'var(--foreground)', borderColor: 'var(--border)' }}
+          >
+            Retrieve
+          </Link>
+          <Link
+            href={`/projects/${project.id}/chat`}
+            className="inline-flex items-center justify-center rounded-md text-sm font-medium h-10 px-4 py-2 border transition-colors"
+            style={{ background: 'var(--background)', color: 'var(--foreground)', borderColor: 'var(--border)' }}
+          >
+            Chat
+          </Link>
+          {project.status !== 'ARCHIVED' ? (
+            <button
+              onClick={onArchive}
+              className="inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium h-10 px-4 py-2 transition-colors"
+              style={{ color: 'var(--muted-foreground)' }}
+            >
+              <ArchiveIcon />
+              Archive
+            </button>
+          ) : null}
+        </div>
+      </div>
+
+      {indexFeedback ? (
+        <p className="text-sm font-medium" style={{ color: 'var(--success)' }}>{indexFeedback}</p>
+      ) : null}
+      {indexError ? <ErrorState title="Indexing failed" message={indexError} /> : null}
+
+      <div className="grid gap-3 grid-cols-2 md:grid-cols-5">
+        <StatCard label="Documents" value={project.documentCount} />
+        <StatCard label="Ready" value={readyCount} color="var(--success)" />
+        <StatCard label="Processing" value={processingCount} color="var(--info)" />
+        <StatCard label="Pending" value={pendingCount} />
+        <StatCard label="Failed" value={failedCount} color="var(--destructive)" />
+      </div>
+
+      <div className="rounded-lg border p-5" style={{ background: 'var(--card)' }}>
+        <div className="grid gap-4 sm:grid-cols-3 text-sm">
+          <div>
+            <div className="text-xs uppercase tracking-wider mb-0.5" style={{ color: 'var(--muted-foreground)' }}>Last indexed</div>
+            <div>{formatDate(project.lastIndexedAt)}{project.lastIndexedAt ? ` (${timeAgo(project.lastIndexedAt)})` : ''}</div>
+          </div>
+          <div>
+            <div className="text-xs uppercase tracking-wider mb-0.5" style={{ color: 'var(--muted-foreground)' }}>Created</div>
+            <div>{formatDate(project.createdAt)}</div>
+          </div>
+          <div>
+            <div className="text-xs uppercase tracking-wider mb-0.5" style={{ color: 'var(--muted-foreground)' }}>Updated</div>
+            <div>{formatDate(project.updatedAt ?? project.createdAt)}</div>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
