@@ -1,5 +1,5 @@
 import { createHash } from 'crypto'
-import { Injectable, Logger, NotFoundException } from '@nestjs/common'
+import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { MIN_EXTRACTED_TEXT_LENGTH } from '@docbrain/config'
 import type { ProjectIndexSummary } from '@docbrain/types'
 import { DocumentSourceType, DocumentStatus, Prisma } from '@prisma/client'
@@ -21,14 +21,17 @@ export class IndexerService {
   private readonly logger = new Logger(IndexerService.name)
 
   constructor(
-    private readonly prisma: PrismaService,
+    @Inject(PrismaService) private readonly prisma: PrismaService,
+    @Inject(SitemapDiscoveryService)
     private readonly sitemapDiscoveryService: SitemapDiscoveryService,
-    private readonly linkDiscoveryService: LinkDiscoveryService,
-    private readonly crawlerService: CrawlerService,
+    @Inject(LinkDiscoveryService) private readonly linkDiscoveryService: LinkDiscoveryService,
+    @Inject(CrawlerService) private readonly crawlerService: CrawlerService,
+    @Inject(ContentExtractorService)
     private readonly contentExtractorService: ContentExtractorService,
+    @Inject(MarkdownConverterService)
     private readonly markdownConverterService: MarkdownConverterService,
-    private readonly chunkerService: ChunkerService,
-    private readonly embeddingService: EmbeddingService,
+    @Inject(ChunkerService) private readonly chunkerService: ChunkerService,
+    @Inject(EmbeddingService) private readonly embeddingService: EmbeddingService,
   ) {}
 
   async indexProject(projectId: string, maxPages: number): Promise<ProjectIndexSummary> {

@@ -15,11 +15,16 @@ import { useProject } from '@/features/projects/api'
 import { ConversationSidebar } from '@/features/chat/conversation-sidebar'
 import { MessageInput } from '@/features/chat/message-input'
 import { MessageList } from '@/features/chat/message-list'
+import { use } from 'react'
 
-export default function ProjectChatPage({ params }: { params: { projectId: string } }) {
+export default function ProjectChatPage({
+  params,
+}: {
+  params: Promise<{ projectId: string }>
+}) {
   const [selectedConversationId, setSelectedConversationId] = useState<string | undefined>(undefined)
   const [optimisticMessages, setOptimisticMessages] = useState<Message[]>([])
-  const projectId = params.projectId
+  const { projectId } = use(params)
   const project = useProject(projectId)
   const conversations = useConversations(projectId)
   const createConversation = useCreateConversation(projectId)

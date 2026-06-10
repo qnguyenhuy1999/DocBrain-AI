@@ -1,5 +1,5 @@
 import type { Chunk, DocumentListItem, IndexProjectResponse } from '@docbrain/types'
-import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common'
+import { BadRequestException, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { PrismaService } from '../database/prisma.service'
 import { IndexerService } from './services/indexer.service'
 
@@ -9,8 +9,8 @@ export class IngestionService {
   private readonly activeJobs = new Map<string, Promise<void>>()
 
   constructor(
-    private readonly prisma: PrismaService,
-    private readonly indexerService: IndexerService,
+    @Inject(PrismaService) private readonly prisma: PrismaService,
+    @Inject(IndexerService) private readonly indexerService: IndexerService,
   ) {}
 
   async indexProject(projectId: string, maxPages: number): Promise<IndexProjectResponse> {

@@ -1,12 +1,12 @@
 import type { ChatResponse, Conversation, Message } from '@docbrain/types'
-import { Body, Controller, Get, Param, ParseUUIDPipe, Post } from '@nestjs/common'
+import { Body, Controller, Get, Inject, Param, ParseUUIDPipe, Post } from '@nestjs/common'
 import { parseCreateConversationDto } from './dto/create-conversation.dto'
 import { parseSendMessageDto } from './dto/send-message.dto'
 import { ChatService } from './chat.service'
 
 @Controller()
 export class ChatController {
-  constructor(private readonly chatService: ChatService) {}
+  constructor(@Inject(ChatService) private readonly chatService: ChatService) {}
 
   @Post('projects/:projectId/conversations')
   async createConversation(

@@ -3,6 +3,7 @@ import {
   Body,
   Controller,
   Get,
+  Inject,
   Param,
   ParseUUIDPipe,
   Post,
@@ -13,7 +14,7 @@ import { IngestionService } from './ingestion.service'
 
 @Controller('projects')
 export class IngestionController {
-  constructor(private readonly ingestionService: IngestionService) {}
+  constructor(@Inject(IngestionService) private readonly ingestionService: IngestionService) {}
 
   @Post(':projectId/index')
   async indexProject(

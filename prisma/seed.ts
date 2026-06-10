@@ -1,6 +1,12 @@
+import path from 'node:path'
+import { config } from 'dotenv'
 import { PrismaClient, DocumentSourceType, MessageRole } from '@prisma/client'
+import { PrismaPg } from '@prisma/adapter-pg'
 
-const prisma = new PrismaClient()
+config({ path: path.resolve(__dirname, '../.env.local') })
+
+const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! })
+const prisma = new PrismaClient({ adapter })
 
 async function main(): Promise<void> {
   console.log('Seeding database...')

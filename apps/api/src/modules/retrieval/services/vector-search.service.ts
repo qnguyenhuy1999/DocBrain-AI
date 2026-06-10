@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Inject, Injectable } from '@nestjs/common'
 import { PrismaService } from '../../database/prisma.service'
 import { toVectorSql } from '../../../common/vector/vector-sql'
 
@@ -15,7 +15,7 @@ export interface RetrievalRow {
 
 @Injectable()
 export class VectorSearchService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
 
   async search(projectId: string, queryVector: number[], topK: number): Promise<RetrievalRow[]> {
     const vectorSql = toVectorSql(queryVector)

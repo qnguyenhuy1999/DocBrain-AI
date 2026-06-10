@@ -1,3 +1,4 @@
+import { EMBEDDING_DIMENSIONS } from '@docbrain/config'
 import { describe, expect, it, vi } from 'vitest'
 import { VectorSearchService } from '../vector-search.service'
 
@@ -9,7 +10,7 @@ describe('VectorSearchService', () => {
     }
 
     const service = new VectorSearchService(prisma as never)
-    const queryVector = Array.from({ length: 1536 }, () => 0.1)
+    const queryVector = Array.from({ length: EMBEDDING_DIMENSIONS }, () => 0.1)
 
     await service.search('project-1', queryVector, 7)
 

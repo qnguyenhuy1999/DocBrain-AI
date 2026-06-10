@@ -3,6 +3,7 @@ import {
   Body,
   Controller,
   Get,
+  Inject,
   Param,
   ParseUUIDPipe,
   Patch,
@@ -14,7 +15,7 @@ import { ProjectsService } from './projects.service'
 
 @Controller('projects')
 export class ProjectsController {
-  constructor(private readonly projectsService: ProjectsService) {}
+  constructor(@Inject(ProjectsService) private readonly projectsService: ProjectsService) {}
 
   @Post()
   async createProject(@Body() body?: unknown): Promise<ProjectOverview> {

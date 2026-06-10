@@ -1,10 +1,10 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 // ─── Enums ────────────────────────────────────────────────────────────────────
@@ -99,7 +99,7 @@ model Embedding {
   id      String @id @default(uuid())
   chunkId String @unique
   model   String
-  vector  Unsupported("vector(1536)")
+  vector  Unsupported("vector(3072)")
 
   chunk Chunk @relation(fields: [chunkId], references: [id], onDelete: Cascade)
 

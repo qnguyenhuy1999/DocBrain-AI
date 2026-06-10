@@ -7,31 +7,46 @@ import { useDocuments } from '@/features/documents/api'
 import { useArchiveProject, useIndexProject, useProject } from '@/features/projects/api'
 import { ProjectOverview } from '@/features/projects/project-overview'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { use, useState } from 'react'
 
-export default function ProjectDetailPage({ params }: { params: { projectId: string } }) {
+export default function ProjectDetailPage({
+  params,
+}: {
+  params: Promise<{ projectId: string }>
+}) {
   const [indexFeedback, setIndexFeedback] = useState<string | null>(null)
   const router = useRouter()
-  const projectId = params.projectId
+  const { projectId } = use(params)
   const project = useProject(projectId)
   const documents = useDocuments(
     projectId,
-    project.data && (project.data.processingCount > 0 || project.data.pendingCount > 0) ? 4000 : false,
+    project.data && (project.data.processingCount > 0 || project.data.pendingCount > 0)
+      ? 4000
+      : false,
   )
   const indexProject = useIndexProject(projectId)
   const archiveProject = useArchiveProject(projectId)
 
   async function handleIndex(): Promise<void> {
     const response = await indexProject.mutateAsync({ maxPages: 30 })
-    setIndexFeedback(response.status === 'ALREADY_RUNNING' ? 'Indexing already running' : 'Indexing started')
+    setIndexFeedback(
+      response.status === 'ALREADY_RUNNING' ? 'Indexing already running' : 'Indexing started',
+    )
     void project.refetch()
     void documents.refetch()
   }
 
   if (project.isLoading) {
     return (
-      <AppShell title="Project detail" description="Loading project overview." projectId={projectId}>
-        <LoadingState title="Loading project" description="Fetching project summary and document stats." />
+      <AppShell
+        title="Project detail"
+        description="Loading project overview."
+        projectId={projectId}
+      >
+        <LoadingState
+          title="Loading project"
+          description="Fetching project summary and document stats."
+        />
       </AppShell>
     )
   }

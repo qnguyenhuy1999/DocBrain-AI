@@ -5,11 +5,29 @@ import { Prisma } from '@prisma/client'
 import OpenAI from 'openai'
 import { toVectorSql } from '../../../common/vector/vector-sql'
 
+type EmbeddingItem = {
+  embedding?: number[]
+}
+
+type EmbeddingErrorPayload = {
+  error?: {
+    message?: string
+    code?: number | string
+  }
+}
+
 @Injectable()
 export class EmbeddingService {
-  private readonly client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+  private readonly client = new OpenAI({
+    baseURL: process.env.OPENAI_EMBEDDING_BASE_URL,
+    apiKey: process.env.OPENAI_EMBEDDING_API_KEY,
+  })
 
   async generateEmbeddings(texts: string[]): Promise<number[][]> {
+    if (texts.length === 0) {
+      return []
+    }
+
     const embeddings: number[][] = []
 
     for (let index = 0; index < texts.length; index += EMBEDDING_BATCH_SIZE) {
@@ -20,7 +38,12 @@ export class EmbeddingService {
         dimensions: EMBEDDING_DIMENSIONS,
       })
 
-      for (const item of response.data) {
+      for (const item of this.readEmbeddingItems(response)) {
+        if (!Array.isArray(item.embedding)) {
+          throw new Error('Embedding response item did not include a vector')
+        }
+
+        this.assertExpectedDimensions(item.embedding)
         embeddings.push(item.embedding)
       }
     }
@@ -35,11 +58,12 @@ export class EmbeddingService {
       dimensions: EMBEDDING_DIMENSIONS,
     })
 
-    const embedding = response.data[0]?.embedding
+    const embedding = this.readEmbeddingItems(response)[0]?.embedding
     if (!embedding) {
       throw new Error('Embedding response did not include a query vector')
     }
 
+    this.assertExpectedDimensions(embedding)
     return embedding
   }
 
@@ -66,5 +90,52 @@ export class EmbeddingService {
         `,
       )
     }
+  }
+
+  private assertExpectedDimensions(vector: number[]): void {
+    if (vector.length !== EMBEDDING_DIMENSIONS) {
+      throw new Error(
+        `Embedding provider returned ${vector.length} dimensions for ${EMBEDDING_MODEL}; expected ${EMBEDDING_DIMENSIONS}. Check whether the provider honors the requested embedding size.`,
+      )
+    }
+  }
+
+  private readEmbeddingItems(response: unknown): EmbeddingItem[] {
+    const providerError = this.readProviderError(response)
+    if (providerError) {
+      throw new Error(providerError)
+    }
+
+    if (
+      typeof response !== 'object' ||
+      response === null ||
+      !('data' in response) ||
+      !Array.isArray(response.data)
+    ) {
+      throw new Error('Embedding provider returned an unexpected payload shape')
+    }
+
+    return response.data as EmbeddingItem[]
+  }
+
+  private readProviderError(response: unknown): string | null {
+    if (
+      typeof response !== 'object' ||
+      response === null ||
+      !('error' in response) ||
+      typeof response.error !== 'object' ||
+      response.error === null
+    ) {
+      return null
+    }
+
+    const error = response as EmbeddingErrorPayload
+    const message = error.error?.message?.trim()
+    if (!message) {
+      return 'Embedding provider returned an unknown error'
+    }
+
+    const code = error.error?.code
+    return code === undefined ? message : `${message} (code: ${code})`
   }
 }

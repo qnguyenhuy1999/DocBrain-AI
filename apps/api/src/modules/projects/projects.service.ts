@@ -1,5 +1,5 @@
 import type { ProjectOverview, UpdateProjectDto } from '@docbrain/types'
-import { Injectable, NotFoundException } from '@nestjs/common'
+import { Inject, Injectable, NotFoundException } from '@nestjs/common'
 import { PrismaService } from '../database/prisma.service'
 
 type ProjectRecord = {
@@ -23,7 +23,7 @@ type ProjectMetrics = {
 
 @Injectable()
 export class ProjectsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
 
   async createProject(input: {
     name: string

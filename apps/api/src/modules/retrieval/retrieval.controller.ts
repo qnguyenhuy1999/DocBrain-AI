@@ -1,11 +1,11 @@
 import type { RetrieveResponse } from '@docbrain/types'
-import { Body, Controller, Param, ParseUUIDPipe, Post } from '@nestjs/common'
+import { Body, Controller, Inject, Param, ParseUUIDPipe, Post } from '@nestjs/common'
 import { parseRetrieveDto } from './dto/retrieve.dto'
 import { RetrievalService } from './retrieval.service'
 
 @Controller('projects')
 export class RetrievalController {
-  constructor(private readonly retrievalService: RetrievalService) {}
+  constructor(@Inject(RetrievalService) private readonly retrievalService: RetrievalService) {}
 
   @Post(':projectId/retrieve')
   async retrieve(

@@ -1,7 +1,7 @@
 import { MIN_RETRIEVAL_SCORE, RAG_TOP_K } from '@docbrain/config'
 import type { ChatResponse, Citation, Conversation, Message, RetrievalMatch } from '@docbrain/types'
 import { Prisma, MessageRole } from '@prisma/client'
-import { Injectable, NotFoundException } from '@nestjs/common'
+import { Inject, Injectable, NotFoundException } from '@nestjs/common'
 import { PrismaService } from '../database/prisma.service'
 import { RetrievalService } from '../retrieval/retrieval.service'
 import { AnswerGeneratorService } from './services/answer-generator.service'
@@ -14,11 +14,11 @@ const NO_CONTEXT_ANSWER =
 @Injectable()
 export class ChatService {
   constructor(
-    private readonly prisma: PrismaService,
-    private readonly retrievalService: RetrievalService,
-    private readonly promptBuilderService: PromptBuilderService,
-    private readonly answerGeneratorService: AnswerGeneratorService,
-    private readonly citationBuilderService: CitationBuilderService,
+    @Inject(PrismaService) private readonly prisma: PrismaService,
+    @Inject(RetrievalService) private readonly retrievalService: RetrievalService,
+    @Inject(PromptBuilderService) private readonly promptBuilderService: PromptBuilderService,
+    @Inject(AnswerGeneratorService) private readonly answerGeneratorService: AnswerGeneratorService,
+    @Inject(CitationBuilderService) private readonly citationBuilderService: CitationBuilderService,
   ) {}
 
   async createConversation(projectId: string, title?: string): Promise<Conversation> {

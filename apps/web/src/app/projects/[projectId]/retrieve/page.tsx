@@ -6,9 +6,14 @@ import { useProject } from '@/features/projects/api'
 import { useRetrieve } from '@/features/retrieval/api'
 import { RetrievalForm } from '@/features/retrieval/retrieval-form'
 import { RetrievalResults } from '@/features/retrieval/retrieval-results'
+import { use } from 'react'
 
-export default function ProjectRetrievePage({ params }: { params: { projectId: string } }) {
-  const projectId = params.projectId
+export default function ProjectRetrievePage({
+  params,
+}: {
+  params: Promise<{ projectId: string }>
+}) {
+  const { projectId } = use(params)
   const project = useProject(projectId)
   const retrieve = useRetrieve(projectId)
 

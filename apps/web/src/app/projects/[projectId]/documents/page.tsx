@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { use, useEffect, useMemo, useState } from 'react'
 import { AppShell } from '@/components/app-shell'
 import { EmptyState } from '@/components/empty-state'
 import { ErrorState } from '@/components/error-state'
@@ -15,11 +15,15 @@ type StatusFilter = 'ALL' | 'READY' | 'FAILED' | 'PROCESSING'
 
 const statusFilterOptions: StatusFilter[] = ['ALL', 'READY', 'PROCESSING', 'FAILED']
 
-export default function ProjectDocumentsPage({ params }: { params: { projectId: string } }) {
+export default function ProjectDocumentsPage({
+  params,
+}: {
+  params: Promise<{ projectId: string }>
+}) {
   const [selectedDocumentId, setSelectedDocumentId] = useState<string | undefined>(undefined)
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('ALL')
   const [searchQuery, setSearchQuery] = useState('')
-  const projectId = params.projectId
+  const { projectId } = use(params)
   const project = useProject(projectId)
   const documents = useDocuments(projectId, 4000)
   const chunks = useChunks(projectId, selectedDocumentId)

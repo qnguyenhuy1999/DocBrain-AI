@@ -8,11 +8,13 @@ describe('vector-sql', () => {
     const literal = toVectorLiteral(vector)
 
     expect(literal.startsWith('[0.00000000,0.10000000')).toBe(true)
-    expect(literal.endsWith('153.50000000]')).toBe(true)
+    expect(literal.endsWith(`${((EMBEDDING_DIMENSIONS - 1) / 10).toFixed(8)}]`)).toBe(true)
   })
 
   it('rejects vectors with invalid dimensions', () => {
-    expect(() => assertVectorDimension([1, 2, 3])).toThrow(/expected 1536/)
+    expect(() => assertVectorDimension([1, 2, 3])).toThrow(
+      new RegExp(`expected ${EMBEDDING_DIMENSIONS}`),
+    )
   })
 
   it('rejects vectors with non-finite values', () => {

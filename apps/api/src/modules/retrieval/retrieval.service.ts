@@ -1,6 +1,6 @@
 import { MIN_RETRIEVAL_SCORE, RAG_TOP_K } from '@docbrain/config'
 import type { RetrieveResponse } from '@docbrain/types'
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
+import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common'
 import { PrismaService } from '../database/prisma.service'
 import { EmbeddingService } from '../ingestion/services/embedding.service'
 import { RetrievalFormatterService } from './services/retrieval-formatter.service'
@@ -14,9 +14,10 @@ export interface RetrieveOptions {
 @Injectable()
 export class RetrievalService {
   constructor(
-    private readonly prisma: PrismaService,
-    private readonly embeddingService: EmbeddingService,
-    private readonly vectorSearchService: VectorSearchService,
+    @Inject(PrismaService) private readonly prisma: PrismaService,
+    @Inject(EmbeddingService) private readonly embeddingService: EmbeddingService,
+    @Inject(VectorSearchService) private readonly vectorSearchService: VectorSearchService,
+    @Inject(RetrievalFormatterService)
     private readonly retrievalFormatterService: RetrievalFormatterService,
   ) {}
 

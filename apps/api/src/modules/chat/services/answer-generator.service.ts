@@ -4,7 +4,10 @@ import OpenAI from 'openai'
 
 @Injectable()
 export class AnswerGeneratorService {
-  private readonly client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+  private readonly client = new OpenAI({
+    baseURL: process.env.OPENAI_BASE_URL,
+    apiKey: process.env.OPENAI_API_KEY,
+  })
 
   async generate(systemPrompt: string, userPrompt: string): Promise<string> {
     try {
