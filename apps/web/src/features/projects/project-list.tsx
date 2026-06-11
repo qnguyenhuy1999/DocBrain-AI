@@ -57,7 +57,7 @@ function ProjectCard({ project }: { project: ProjectOverview }) {
 
   return (
     <div
-      className="rounded-lg border p-5 flex flex-col gap-4 transition-shadow hover:shadow-md"
+      className="rounded-xl border p-5 flex flex-col gap-4 card-hover"
       style={{
         background: 'var(--card)',
         color: 'var(--card-foreground)',

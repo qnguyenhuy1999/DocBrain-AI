@@ -1,7 +1,6 @@
 'use client'
 
 import type { Conversation } from '@docbrain/types'
-import { Button } from '@docbrain/ui'
 import { formatDate, truncate } from '@/lib/format'
 
 export function ConversationSidebar({
@@ -18,19 +17,25 @@ export function ConversationSidebar({
   isCreatingConversation: boolean
 }) {
   return (
-    <div className="rounded-3xl border border-white/60 bg-white/85 p-4">
-      <div className="flex items-center justify-between gap-3">
+    <div className="rounded-lg border flex flex-col overflow-hidden" style={{ background: 'var(--card)' }}>
+      <div className="p-4 border-b flex items-center justify-between gap-3" style={{ borderColor: 'var(--border)' }}>
         <div>
-          <p className="text-sm font-semibold text-slate-950">Conversations</p>
-          <p className="text-xs text-slate-600">Create a thread or reopen an existing one.</p>
+          <p className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>Conversations</p>
+          <p className="text-xs" style={{ color: 'var(--muted-foreground)' }}>Create a thread or pick one.</p>
         </div>
-        <Button disabled={isCreatingConversation} onClick={onCreateConversation} size="sm">
-          New conversation
-        </Button>
+        <button
+          type="button"
+          disabled={isCreatingConversation}
+          onClick={onCreateConversation}
+          className="inline-flex items-center justify-center rounded-md text-xs font-medium h-7 px-3 transition-colors disabled:opacity-50"
+          style={{ background: 'var(--primary)', color: 'var(--primary-foreground)' }}
+        >
+          {isCreatingConversation ? '…' : 'New'}
+        </button>
       </div>
-      <div className="mt-4 space-y-2">
+      <div className="flex-1 overflow-y-auto p-2 space-y-1">
         {conversations.length === 0 ? (
-          <p className="rounded-2xl border border-dashed border-slate-300 px-3 py-4 text-sm text-slate-500">
+          <p className="rounded-md border border-dashed px-3 py-4 text-sm text-center" style={{ color: 'var(--muted-foreground)', borderColor: 'var(--border)' }}>
             No conversations yet
           </p>
         ) : null}
@@ -39,18 +44,18 @@ export function ConversationSidebar({
           return (
             <button
               key={conversation.id}
-              className={
-                active
-                  ? 'block w-full rounded-2xl bg-slate-950 px-3 py-3 text-left text-white'
-                  : 'block w-full rounded-2xl bg-amber-50/70 px-3 py-3 text-left text-slate-900 hover:bg-amber-100'
+              className="block w-full rounded-md px-3 py-2.5 text-left transition-colors"
+              style={active
+                ? { background: 'var(--primary)', color: 'var(--primary-foreground)' }
+                : { color: 'var(--foreground)' }
               }
               onClick={() => onSelectConversation(conversation.id)}
               type="button"
             >
-              <p className="text-sm font-medium">
-                {truncate(conversation.title || 'Untitled conversation', 42)}
+              <p className="text-sm font-medium leading-snug">
+                {truncate(conversation.title || 'Untitled conversation', 38)}
               </p>
-              <p className={active ? 'mt-1 text-xs text-white/70' : 'mt-1 text-xs text-slate-500'}>
+              <p className="mt-0.5 text-xs" style={{ color: active ? 'var(--primary-foreground)' : 'var(--muted-foreground)', opacity: active ? 0.75 : 1 }}>
                 {formatDate(conversation.updatedAt)}
               </p>
             </button>

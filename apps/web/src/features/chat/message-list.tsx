@@ -6,10 +6,10 @@ import { CitationList } from './citation-list'
 
 function LoadingDots() {
   return (
-    <div className="flex gap-1 py-1">
-      <span className="h-2 w-2 animate-bounce rounded-full bg-slate-400 [animation-delay:-0.3s]" />
-      <span className="h-2 w-2 animate-bounce rounded-full bg-slate-400 [animation-delay:-0.15s]" />
-      <span className="h-2 w-2 animate-bounce rounded-full bg-slate-400" />
+    <div className="flex gap-1.5 py-1">
+      <span className="h-2 w-2 animate-bounce rounded-full [animation-delay:-0.3s]" style={{ background: 'var(--muted-foreground)' }} />
+      <span className="h-2 w-2 animate-bounce rounded-full [animation-delay:-0.15s]" style={{ background: 'var(--muted-foreground)' }} />
+      <span className="h-2 w-2 animate-bounce rounded-full" style={{ background: 'var(--muted-foreground)' }} />
     </div>
   )
 }
@@ -22,24 +22,42 @@ export function MessageList({ messages }: { messages: Message[] }) {
   }, [messages])
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {messages.map((message) => {
         const isAssistant = message.role === 'ASSISTANT'
         const isEmpty = isAssistant && message.content === ''
         return (
           <div
             key={message.id}
-            className={
-              isAssistant
-                ? 'mr-10 rounded-3xl bg-white p-4 shadow-sm'
-                : 'ml-10 rounded-3xl bg-slate-950 p-4 text-white shadow-sm'
-            }
+            className={isAssistant ? 'mr-10' : 'ml-10'}
           >
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] opacity-70">{message.role}</p>
-            <div className="mt-2 whitespace-pre-wrap text-sm leading-6">
-              {isEmpty ? <LoadingDots /> : message.content}
+            <div
+              className="rounded-2xl px-4 py-3"
+              style={isAssistant
+                ? {
+                    background: 'var(--muted)',
+                    color: 'var(--foreground)',
+                    border: '1px solid var(--border)',
+                  }
+                : {
+                    background: 'var(--primary)',
+                    color: 'var(--primary-foreground)',
+                  }
+              }
+            >
+              <p
+                className="text-[10px] font-bold uppercase tracking-[0.18em] mb-2"
+                style={{ opacity: 0.5 }}
+              >
+                {message.role}
+              </p>
+              <div className="whitespace-pre-wrap text-sm leading-6">
+                {isEmpty ? <LoadingDots /> : message.content}
+              </div>
             </div>
-            {isAssistant && !isEmpty && message.citations ? <CitationList citations={message.citations} /> : null}
+            {isAssistant && !isEmpty && message.citations ? (
+              <CitationList citations={message.citations} />
+            ) : null}
           </div>
         )
       })}

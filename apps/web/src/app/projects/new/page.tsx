@@ -4,7 +4,7 @@ import { ProjectForm } from '@/features/projects/project-form'
 export default function NewProjectPage() {
   return (
     <AppShell>
-      <section className="container py-8">
+      <section className="container py-8 mx-auto w-2/5">
         <div className="mb-6">
           <h1 className="text-2xl font-semibold tracking-tight">New project</h1>
           <p className="text-sm mt-1" style={{ color: 'var(--muted-foreground)' }}>

@@ -20,29 +20,31 @@ function ChunkCard({ chunk }: { chunk: Chunk }) {
   }
 
   return (
-    <div className="rounded-2xl border border-amber-100 bg-white p-4 shadow-sm">
+    <div className="rounded-lg border p-4" style={{ background: 'var(--card)', borderColor: 'var(--border)' }}>
       <div className="mb-2 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-3 text-xs text-slate-500">
-          <span className="font-semibold text-amber-700">#{chunk.chunkIndex}</span>
-          <span className="text-slate-400">·</span>
+        <div className="flex items-center gap-2 text-xs" style={{ color: 'var(--muted-foreground)' }}>
+          <span className="font-semibold" style={{ color: 'var(--secondary)' }}>#{chunk.chunkIndex}</span>
+          <span style={{ color: 'var(--border)' }}>·</span>
           <span>{chunk.section || 'Untitled section'}</span>
-          <span className="text-slate-400">·</span>
+          <span style={{ color: 'var(--border)' }}>·</span>
           <span>{chunk.tokenCount} tokens</span>
         </div>
         <button
           type="button"
           onClick={handleCopy}
-          className="rounded-lg border border-slate-200 px-2 py-1 text-xs font-medium text-slate-600 transition hover:border-amber-300 hover:text-amber-700"
+          className="rounded-md border px-2 py-1 text-xs font-medium transition-colors"
+          style={{ background: 'var(--background)', borderColor: 'var(--border)', color: 'var(--muted-foreground)' }}
         >
           {copied ? 'Copied!' : 'Copy'}
         </button>
       </div>
-      <p className="text-sm leading-6 text-slate-700 whitespace-pre-wrap break-words">{displayContent}</p>
+      <p className="text-sm leading-6 whitespace-pre-wrap break-words" style={{ color: 'var(--foreground)' }}>{displayContent}</p>
       {isLong ? (
         <button
           type="button"
           onClick={() => setExpanded((v) => !v)}
-          className="mt-2 text-xs font-medium text-amber-700 hover:underline"
+          className="mt-2 text-xs font-medium hover:underline"
+          style={{ color: 'var(--secondary)' }}
         >
           {expanded ? 'Show less' : 'Show more'}
         </button>

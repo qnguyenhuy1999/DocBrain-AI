@@ -1,5 +1,3 @@
-import { Card, CardContent } from '@docbrain/ui'
-
 export function EmptyState({
   title,
   description,
@@ -10,14 +8,16 @@ export function EmptyState({
   action?: React.ReactNode
 }) {
   return (
-    <Card className="border-dashed border-slate-300 bg-white/70">
-      <CardContent className="flex flex-col items-start gap-4 p-8">
-        <div>
-          <p className="text-lg font-semibold text-slate-950">{title}</p>
-          <p className="mt-1 text-sm text-slate-600">{description}</p>
-        </div>
-        {action}
-      </CardContent>
-    </Card>
+    <div
+      className="rounded-xl border border-dashed p-8 text-sm"
+      style={{
+        background: 'color-mix(in srgb, var(--muted) 40%, transparent)',
+        borderColor: 'var(--border)',
+      }}
+    >
+      <p className="font-semibold text-base" style={{ color: 'var(--foreground)' }}>{title}</p>
+      <p className="mt-1" style={{ color: 'var(--muted-foreground)' }}>{description}</p>
+      {action ? <div className="mt-4">{action}</div> : null}
+    </div>
   )
 }

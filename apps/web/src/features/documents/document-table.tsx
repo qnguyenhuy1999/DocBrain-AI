@@ -1,21 +1,26 @@
 'use client'
 
 import type { DocumentListItem } from '@docbrain/types'
-import { Badge, Button, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@docbrain/ui'
 import { formatDate, truncate } from '@/lib/format'
 
-function statusVariant(status: DocumentListItem['status']) {
-  if (status === 'READY') return 'success'
-  if (status === 'FAILED') return 'danger'
-  if (status === 'PROCESSING') return 'warning'
-  return 'outline'
-}
-
-function statusLabel(status: DocumentListItem['status']) {
-  if (status === 'READY') return 'Ready'
-  if (status === 'PROCESSING') return 'Processing'
-  if (status === 'FAILED') return 'Failed'
-  return 'Pending'
+function StatusBadge({ status }: { status: DocumentListItem['status'] }) {
+  const styles: Record<DocumentListItem['status'], { background: string; color: string }> = {
+    READY: { background: 'color-mix(in srgb, var(--success) 15%, transparent)', color: 'var(--success)' },
+    FAILED: { background: 'color-mix(in srgb, var(--destructive) 15%, transparent)', color: 'var(--destructive)' },
+    PROCESSING: { background: 'color-mix(in srgb, var(--info) 15%, transparent)', color: 'var(--info)' },
+    PENDING: { background: 'var(--muted)', color: 'var(--muted-foreground)' },
+  }
+  const labels: Record<DocumentListItem['status'], string> = {
+    READY: 'Ready', FAILED: 'Failed', PROCESSING: 'Processing', PENDING: 'Pending',
+  }
+  return (
+    <span
+      className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold"
+      style={styles[status]}
+    >
+      {labels[status]}
+    </span>
+  )
 }
 
 export function DocumentTable({
@@ -29,76 +34,97 @@ export function DocumentTable({
 }) {
   return (
     <>
-      {/* Mobile card list */}
+      {/* Mobile cards */}
       <div className="space-y-3 sm:hidden">
         {documents.map((document) => (
           <div
             key={document.id}
-            className={`rounded-2xl border p-4 ${selectedDocumentId === document.id ? 'border-amber-300 bg-amber-50/80' : 'border-slate-200 bg-white'}`}
+            className="rounded-lg border p-4"
+            style={{
+              background: selectedDocumentId === document.id ? 'color-mix(in srgb, var(--secondary) 10%, var(--card))' : 'var(--card)',
+              borderColor: selectedDocumentId === document.id ? 'var(--secondary)' : 'var(--border)',
+            }}
           >
             <div className="flex items-start justify-between gap-3">
-              <p className="font-medium text-slate-950 leading-snug">{document.title}</p>
-              <Badge variant={statusVariant(document.status)}>{statusLabel(document.status)}</Badge>
+              <p className="font-medium leading-snug" style={{ color: 'var(--foreground)' }}>{document.title}</p>
+              <StatusBadge status={document.status} />
             </div>
             {document.sourceUrl ? (
-              <p className="mt-1 text-xs text-slate-500 break-all">{truncate(document.sourceUrl, 60)}</p>
+              <p className="mt-1 text-xs break-all" style={{ color: 'var(--muted-foreground)' }}>{truncate(document.sourceUrl, 60)}</p>
             ) : (
-              <p className="mt-1 text-xs text-slate-400">No URL</p>
+              <p className="mt-1 text-xs" style={{ color: 'var(--muted-foreground)' }}>No URL</p>
             )}
-            <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500">
+            <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs" style={{ color: 'var(--muted-foreground)' }}>
               <span>{document.chunkCount} chunks</span>
               <span>{formatDate(document.indexedAt)}</span>
             </div>
             {document.errorMessage ? (
-              <p className="mt-2 text-xs text-rose-700">{truncate(document.errorMessage, 72)}</p>
+              <p className="mt-2 text-xs" style={{ color: 'var(--destructive)' }}>{truncate(document.errorMessage, 72)}</p>
             ) : null}
             <div className="mt-3">
-              <Button size="sm" variant="outline" onClick={() => onSelect(document.id)}>
+              <button
+                type="button"
+                onClick={() => onSelect(document.id)}
+                className="inline-flex items-center justify-center rounded-md border text-xs font-medium h-7 px-3 transition-colors"
+                style={{ background: 'var(--background)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
+              >
                 {selectedDocumentId === document.id ? 'Selected' : 'View chunks'}
-              </Button>
+              </button>
             </div>
           </div>
         ))}
       </div>
 
       {/* Desktop table */}
-      <div className="hidden sm:block">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Title</TableHead>
-              <TableHead>Source URL</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Chunk count</TableHead>
-              <TableHead>Indexed at</TableHead>
-              <TableHead>Error message</TableHead>
-              <TableHead />
-            </TableRow>
-          </TableHeader>
-          <TableBody>
+      <div className="hidden sm:block rounded-lg border overflow-hidden" style={{ background: 'var(--card)' }}>
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b text-xs uppercase tracking-wider" style={{ borderColor: 'var(--border)', color: 'var(--muted-foreground)' }}>
+              <th className="px-4 py-3 text-left font-medium">Title</th>
+              <th className="px-4 py-3 text-left font-medium">Source URL</th>
+              <th className="px-4 py-3 text-left font-medium">Status</th>
+              <th className="px-4 py-3 text-left font-medium">Chunks</th>
+              <th className="px-4 py-3 text-left font-medium">Indexed at</th>
+              <th className="px-4 py-3 text-left font-medium">Error</th>
+              <th className="px-4 py-3" />
+            </tr>
+          </thead>
+          <tbody>
             {documents.map((document) => (
-              <TableRow key={document.id} className={selectedDocumentId === document.id ? 'bg-amber-50/80' : undefined}>
-                <TableCell className="font-medium text-slate-950">{document.title}</TableCell>
-                <TableCell className="text-slate-600">
+              <tr
+                key={document.id}
+                className="border-b last:border-0 transition-colors"
+                style={{
+                  borderColor: 'var(--border)',
+                  background: selectedDocumentId === document.id ? 'color-mix(in srgb, var(--secondary) 8%, var(--card))' : undefined,
+                }}
+              >
+                <td className="px-4 py-3 font-medium" style={{ color: 'var(--foreground)' }}>{document.title}</td>
+                <td className="px-4 py-3 max-w-xs" style={{ color: 'var(--muted-foreground)' }}>
                   {document.sourceUrl ? truncate(document.sourceUrl, 48) : 'No URL'}
-                </TableCell>
-                <TableCell>
-                  <Badge variant={statusVariant(document.status)}>{statusLabel(document.status)}</Badge>
-                </TableCell>
-                <TableCell>{document.chunkCount}</TableCell>
-                <TableCell>{formatDate(document.indexedAt)}</TableCell>
-                <TableCell className="max-w-xs text-sm text-rose-700">
-                  {document.errorMessage ? truncate(document.errorMessage, 72) : '-'}
-                </TableCell>
-                <TableCell>
-                  <Button size="sm" variant="outline" onClick={() => onSelect(document.id)}>
+                </td>
+                <td className="px-4 py-3">
+                  <StatusBadge status={document.status} />
+                </td>
+                <td className="px-4 py-3" style={{ color: 'var(--foreground)' }}>{document.chunkCount}</td>
+                <td className="px-4 py-3" style={{ color: 'var(--muted-foreground)' }}>{formatDate(document.indexedAt)}</td>
+                <td className="px-4 py-3 max-w-xs text-xs" style={{ color: 'var(--destructive)' }}>
+                  {document.errorMessage ? truncate(document.errorMessage, 72) : '—'}
+                </td>
+                <td className="px-4 py-3">
+                  <button
+                    type="button"
+                    onClick={() => onSelect(document.id)}
+                    className="inline-flex items-center justify-center rounded-md border text-xs font-medium h-7 px-3 transition-colors whitespace-nowrap"
+                    style={{ background: 'var(--background)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
+                  >
                     {selectedDocumentId === document.id ? 'Selected' : 'View chunks'}
-                  </Button>
-                </TableCell>
-              </TableRow>
+                  </button>
+                </td>
+              </tr>
             ))}
-          </TableBody>
-        </Table>
+          </tbody>
+        </table>
       </div>
     </>
   )
